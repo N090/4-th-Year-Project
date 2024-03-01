@@ -1,28 +1,101 @@
-<!-- register.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <style>
+        /* Center the form */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4; /* Background color for the page */
+        }
+
+        /* Style for the registration container */
+        .registration-container {
+            background-color: #fff; /* Background color for the container */
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px; /* Set maximum width */
+            width: 100%; /* Full width on smaller screens */
+        }
+
+        /* Form styling */
+        form {
+            margin-top: 20px; /* Add space between heading and form */
+        }
+
+        /* Form label styling */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Form input styling */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        select {
+            width: calc(100% - 22px); /* Adjust width to fit inside the container */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        /* Form input focus styling */
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            border-color: #4CAF50;
+        }
+
+        /* Form button styling */
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Form button hover styling */
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <h2>User Registration</h2>
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
-        <label for="role">Role:</label>
-        <select id="role" name="role" required>
-            {% for role in roles %}
-                <option value="{{ role }}">{{ role }}</option>
-            {% endfor %}
-        </select><br>
-        <button type="submit">Register</button>
-    </form>
-    
+    <div class="registration-container">
+        <h2>User Registration</h2>
+        <form method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                {% for role in roles %}
+                    <option value="{{ role }}">{{ role }}</option>
+                {% endfor %}
+            </select><br>
+            <button type="submit">Register</button>
+        </form>
+    </div>
 </body>
 </html>

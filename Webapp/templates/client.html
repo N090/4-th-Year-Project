@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clients</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 </head>
 <body>
-    <h1>Clients</h1>
-    {% if role == "trainer" %}
-        <a href="#">Create Client</a><br>
-        <a href="#">View Clients</a><br>
-        <a href="#">Delete Clients</a><br>
-    {% endif %}
+    <div class="client-container">
+        <h1 class="client-heading">Clients</h1>
+        {% if role == "trainer" %}
+            <div class="client-btn-container">
+                <a href="#" class="client-btn">Create Client</a><br>
+                <a href="#" class="client-btn">View Clients</a><br>
+                <a href="#" class="client-btn">Delete Clients</a><br>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>

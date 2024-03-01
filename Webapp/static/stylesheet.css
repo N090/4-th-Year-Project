@@ -1,0 +1,232 @@
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+}
+
+/* Common container styles */
+.container {
+    width: 400px; /* Adjust the width as needed */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Center horizontally */
+}
+
+/* Login container */
+.login-container {
+    height: 300px; /* Set the height */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+/* Main container */
+.main-container {
+    height: 550px; /* Set the height */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+/* Register container */
+.register-container {
+    height: 400px; /* Set the height */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+/* Index container */
+.index-container {
+    height: 600px; /* Set the height */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+/* Add specific styles for each section as needed */
+/* Styles for Workout Program page */
+.workout-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1.workout {
+    text-align: center;
+}
+
+h2.workout {
+    margin-top: 20px;
+    text-align: center;
+}
+
+form.workout {
+    margin-top: 20px;
+}
+
+form.workout label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form.workout input[type="text"],
+form.workout textarea,
+form.workout select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form.workout button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form.workout button:hover {
+    background-color: #4CAF50;
+}
+
+ul.workout {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul.workout li.workout {
+    margin-bottom: 10px;
+}
+
+ul.workout li.workout button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+ul.workout li.workout button:hover {
+    background-color: #4CAF50;
+}
+
+/* Styles for Clients page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+}
+
+.client-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.client-heading {
+    text-align: center;
+}
+
+.client-btn-container {
+    text-align: center;
+}
+
+.client-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.client-btn:hover {
+    background-color: #4CAF50;
+}
+
+/* Styles for Nutrition Program page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+}
+
+.nutrition-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+.nutrition-btn-container {
+    text-align: center;
+}
+
+.nutrition-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.nutrition-btn:hover {
+    background-color: #4CAF50;
+}
+
+.main-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.main-button:hover {
+    background-color: #4CAF50;
+}

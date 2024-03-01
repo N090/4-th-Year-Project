@@ -1,54 +1,137 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workout Program</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 </head>
 <body>
-    <h1>Workout Program</h1>
-    {% if role == "trainer" %}
-        <h2>Create New Workout Program</h2>
-        <!-- Form to create a new workout program -->
-        <form id="createWorkoutForm" action="{{ url_for('create_workout') }}" method="post">
-            <label for="name">Name:</label><br>
-            <input type="text" id="name" name="name"><br>
-            <label for="description">Description:</label><br>
-            <textarea id="description" name="description"></textarea><br>
-            <label for="difficulty">Difficulty:</label><br>
-            <input type="text" id="difficulty" name="difficulty"><br>
-            <!-- Add button to add exercises -->
-            <button type="button" onclick="addExerciseToWorkout()">Add Exercise to Workout</button>
-            <!-- Add button to select another exercise -->
-            <button type="button" onclick="showExerciseForm()">Select Another Exercise</button>
-            <!-- Hidden div for exercise form -->
-            <div id="exerciseForm" style="display: none;">
+    <div class="workout-container">
+        <h1 class="h1-workout">Workout Program</h1>
+        {% if role == "trainer" %}
+            <!-- Trainer UI -->
+            <h2 class="h2-workout">Create New Workout Program</h2>
+            <!-- Form to create a new workout program -->
+            <form class="form-workout" id="createWorkoutForm" action="{{ url_for('create_workout') }}" method="post">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name"><br>
+                <label for="description">Description:</label><br>
+                <textarea id="description" name="description"></textarea><br>
+                <label for="difficulty">Difficulty:</label><br>
+                <input type="text" id="difficulty" name="difficulty"><br>
+                <!-- Add button to add exercises -->
+                <button type="button" onclick="addExerciseToWorkout()" class="main-button">Add Exercise to Workout</button>
+                <!-- Add button to select another exercise -->
+                <button type="button" onclick="showExerciseForm()" class="main-button">Select Another Exercise</button>
+                <!-- Hidden div for exercise form -->
+                <div id="exerciseForm" style="display: none;">
+                    <label for="exercise">Select Exercise:</label>
+                    <select id="exercise" name="exercise_ids" onchange="fetchExerciseDetails()" class="form-workout"> <!-- Add onchange event -->
+                        <option value="">Select Exercise</option>
+                        {% for exercise in exercises %}
+                            <option value="{{ exercise.e_id }}">{{ exercise.name }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="sets">Sets:</label>
+                    <input type="text" id="sets" name="sets" class="form-workout"><br>
+                    <label for="reps">Reps:</label>
+                    <input type="text" id="reps" name="reps" class="form-workout"><br>
+                    <!-- Additional information about the selected exercise will be displayed here -->
+                    <div id="exerciseDetails"></div>
+                </div><br>
+                <input type="submit" value="Create" class="main-button">
+            </form>
+        {% elif role == "solo-client" %}
+            <!-- Solo Client UI -->
+            <h2 class="h2-workout">Create New Workout Program</h2>
+            <!-- Form to create a new workout program -->
+            <form class="form-workout" id="createWorkoutForm" action="{{ url_for('create_workout') }}" method="post">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name"><br>
+                <label for="description">Description:</label><br>
+                <textarea id="description" name="description"></textarea><br>
+                <label for="difficulty">Difficulty:</label><br>
+                <input type="text" id="difficulty" name="difficulty"><br>
+                <!-- Select Exercise -->
                 <label for="exercise">Select Exercise:</label>
-                <select id="exercise" name="exercise_ids" onchange="fetchExerciseDetails()"> <!-- Add onchange event -->
+                <select id="exercise" name="exercise_ids" onchange="fetchExerciseDetails()" class="form-workout">
                     <option value="">Select Exercise</option>
                     {% for exercise in exercises %}
                         <option value="{{ exercise.e_id }}">{{ exercise.name }}</option>
                     {% endfor %}
                 </select><br>
-                
+                <!-- Exercise details will be displayed here -->
+                <div id="exerciseDetails"></div><br>
+                <!-- Sets and Reps -->
                 <label for="sets">Sets:</label>
-                <input type="text" id="sets" name="sets"><br>
+                <input type="text" id="sets" name="sets" class="form-workout"><br>
                 <label for="reps">Reps:</label>
-                <input type="text" id="reps" name="reps"><br>
-                <!-- Additional information about the selected exercise will be displayed here -->
-                <div id="exerciseDetails"></div>
-            </div><br>
-            <input type="submit" value="Create">
-        </form>
-    {% endif %}
+                <input type="text" id="reps" name="reps" class="form-workout"><br>
+                <input type="submit" value="Create" class="main-button">
+            </form>
+        {% endif %}
+
+        
+        <!-- Client UI -->
+        <h2 class="h2-workout">View Workouts</h2>
+        <ul class="ul-workout">
+            {% for workout in workouts %}
+                <li class="li-workout">{{ workout.w_name }} - {{ workout.description }} (Difficulty: {{ workout.difficulty }})</li>
+                {% if role == "trainer" or role == "solo-client" %}
+                    <button onclick="deleteWorkout('{{ workout.workout_id }}')" class="main-button">Delete</button>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
     <script>
         function showExerciseForm() {
             var exerciseForm = document.getElementById("exerciseForm");
             exerciseForm.style.display = "block";
         }
+        
         function fetchExerciseDetails() {
-        var exerciseId = document.getElementById("exercise").value;
-        fetch("/exercise_details/" + exerciseId)
+            var exerciseId = document.getElementById("exercise").value;
+            fetch("/exercise_details/" + exerciseId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Exercise details:", data);  // Debugging statement
+                    var exerciseDetails = "<p>Name: " + data.name + "</p>";
+                    exerciseDetails += "<p>Description: " + data.description + "</p>";
+                    exerciseDetails += "<p>Muscle Group: " + data.muscle_group.join(", ") + "</p>";
+                    exerciseDetails += "<p>Equipment: " + data.equipment + "</p>";
+                    exerciseDetails += "<p>Sets: " + data.sets + "</p>";
+                    exerciseDetails += "<p>Reps: " + data.reps + "</p>";
+                    document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
+                })
+                .catch(error => console.error('Error fetching exercise details:', error));
+        }
+    
+        function addExerciseToWorkout() {
+            var exerciseId = document.getElementById("exercise").value;
+            var sets = document.getElementById("sets").value;
+            var reps = document.getElementById("reps").value;
+            var workoutId = document.getElementById("workoutId").value; // Assume you have a hidden input field with workoutId
+            // Send a POST request to your backend to add exercise to workout
+            fetch("/add_exercise_to_workout", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    workout_id: workoutId,
+                    exercise_id: exerciseId,
+                    sets: sets,
+                    reps: reps
+                })
+            })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -56,25 +139,28 @@
                 return response.json();
             })
             .then(data => {
-                console.log("Exercise details:", data);  // Debugging statement
-                var exerciseDetails = "<p>Name: " + data.name + "</p>";
-                exerciseDetails += "<p>Description: " + data.description + "</p>";
-                exerciseDetails += "<p>Muscle Group: " + data.muscle_group.join(", ") + "</p>";
-                exerciseDetails += "<p>Equipment: " + data.equipment + "</p>";
-                exerciseDetails += "<p>Sets: " + data.sets + "</p>";
-                exerciseDetails += "<p>Reps: " + data.reps + "</p>";
-                document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
+                // Handle success response from the server
+                console.log(data);
             })
-            .catch(error => console.error('Error fetching exercise details:', error));
-    }
-
-    function addExerciseToWorkout() {
-        var exerciseId = document.getElementById("exercise").value;
-        var sets = document.getElementById("sets").value;
-        var reps = document.getElementById("reps").value;
-        // Add logic to add exercise to workout program (you need to implement this)
-        console.log("Exercise added to workout:", exerciseId, "Sets:", sets, "Reps:", reps);
-    }
-    </script>    
+            .catch(error => console.error('Error adding exercise to workout:', error));
+        }
+        
+        function deleteWorkout(id) {
+            fetch("/delete_workout/" + id)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Reload the page after deletion
+                    window.location.reload();
+                })
+                .catch(error => console.error('Error deleting workout:', error));
+        }
+    </script>
+    
 </body>
 </html>
+

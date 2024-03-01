@@ -104,20 +104,47 @@ def main():
             return render_template('main.html', username=username, role=user.role)
     return redirect(url_for('login'))
 
+def create_workout_solo():
+    if request.method == 'POST':
+        username = session.get('username')
+        if username:
+            user = User.query.filter_by(username=username).first()
+            if user and (user.role == "solo-client" or user.role == "client"):
+                w_name = request.form['name']
+                description = request.form['description']
+                difficulty = request.form['difficulty']
+                
+                new_workout = WorkoutProgram(w_name=w_name, description=description, difficulty=difficulty, user_id=user.id)
+                db.session.add(new_workout)
+                db.session.commit()
+                
+                exercises = Exercises.query.all()
+                
+                return render_template('workout_program.html', role=user.role, exercises=exercises)
+                
+    return redirect(url_for('workout_program'))
+
+@app.route('/delete_workout_solo/<int:id>')
+def delete_workout_solo(id):
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and (user.role == "solo-client" or user.role == "client"):
+            WorkoutProgramExercises.query.filter_by(workout_id=id).delete()
+            workout = WorkoutProgram.query.get(id)
+            db.session.delete(workout)
+            db.session.commit()
+    return redirect(url_for('workout_program'))
+
 @app.route('/workout_program')
 def workout_program():
     username = session.get('username')
     if username:
         user = User.query.filter_by(username=username).first()
         if user:
-            if user.role == "solo-client" or user.role == "client":
-                workout = WorkoutProgram.query.filter_by(user_id=user.id).first()
-                exercises = Exercises.query.all()
-                return render_template('workout_program.html', role=user.role, workout=workout, exercises=exercises)
-            elif user.role == "trainer":
-                workouts = WorkoutProgram.query.all()
-                exercises = Exercises.query.all()
-                return render_template('workout_program.html', role=user.role, workouts=workouts, exercises=exercises)
+            workouts = WorkoutProgram.query.all()
+            exercises = Exercises.query.all()
+            return render_template('workout_program.html', role=user.role, workouts=workouts, exercises=exercises)
     return redirect(url_for('login'))
 
 @app.route('/create_workout', methods=['POST'])
@@ -186,6 +213,12 @@ def client():
         if user:
             return render_template('client.html', role=user.role)
     return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('homepage'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

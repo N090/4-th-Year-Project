@@ -4,38 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 </head>
 <body>
-    <h1>Welcome, {{ username }}!</h1>
-    <h2>Select an option based on your role:</h2>
-    {% if role == "solo-client" %}
-        <a href="#">Logout</a><br>
-        <a href="#">Change Password</a><br>
-        <a href="/workout_program">Workout Program</a><br>
-        <a href="/nutrition_program">Nutrition Program</a><br>
-        <a href="#">Record Workout</a><br>
-        <a href="#">Record Nutrition Program</a><br>
-        <a href="#">View Progress</a><br>
-        <a href="#">Analyse Data</a><br>
-        <a href="#">Analysis Image</a><br>
-    {% elif role == "client" %}
-        <a href="#">Logout</a><br>
-        <a href="#">Change Password</a><br>
-        <a href="/nutrition_program">Nutrition Program</a><br>
-        <a href="/workout_program">Workout Program</a><br>
-        <a href="#">Record Workout</a><br>
-        <a href="#">Record Nutrition</a><br>
-        <a href="#">View Progress</a><br>
-        <a href="#">Analyse Data</a><br>
-        <a href="#">Analysis Image</a><br>
-    {% elif role == "trainer" %}
-        <a href="#">Logout</a><br>
-        <a href="#">Change Password</a><br>
-        <a href="/nutrition_program">Nutrition Program</a><br>
-        <a href="/workout_program">Workout Program</a><br>
-        <a href="/client">Clients</a><br>
-        <a href="#">Analyse Data</a><br>
-        <a href="#">Analysis Image</a><br>
-    {% endif %}
+    <div class="container">
+        <div class="content">
+            <h1>Welcome, {{ username }}!</h1>
+            <h2>Select an option:</h2>
+        </div>
+        <div class="buttons">
+            {% if role == "solo-client" %}
+                <a href="{{ url_for('logout') }}" class="main-button">Logout</a><br>
+                <a href="#" class="main-button">Change Password</a><br>
+                <a href="/workout_program" class="main-button">Workout Program</a><br>
+                <a href="/nutrition_program" class="main-button">Nutrition Program</a><br>
+                <a href="#" class="main-button">Record Workout</a><br>
+                <a href="#" class="main-button">Record Nutrition Program</a><br>
+                <a href="#" class="main-button">View Progress</a><br>
+                <a href="#" class="main-button">Analyse Data</a><br>
+                <a href="#" class="main-button">Analysis Image</a><br>
+            {% elif role == "client" %}
+                <a href="{{ url_for('logout') }}" class="main-button">Logout</a><br>
+                <a href="#" class="main-button">Change Password</a><br>
+                <a href="/nutrition_program" class="main-button">Nutrition Program</a><br>
+                <a href="/workout_program" class="main-button">Workout Program</a><br>
+                <a href="#" class="main-button">Record Workout</a><br>
+                <a href="#" class="main-button">Record Nutrition</a><br>
+                <a href="#" class="main-button">View Progress</a><br>
+                <a href="#" class="main-button">Analyse Data</a><br>
+                <a href="#" class="main-button">Analysis Image</a><br>
+            {% elif role == "trainer" %}
+                <a href="{{ url_for('logout') }}" class="main-button">Logout</a><br>
+                <a href="#" class="main-button">Change Password</a><br>
+                <a href="/nutrition_program" class="main-button">Nutrition Program</a><br>
+                <a href="/workout_program" class="main-button">Workout Program</a><br>
+                <a href="/client" class="main-button">Clients</a><br>
+                <a href="#" class="main-button">Analyse Data</a><br>
+                <a href="#" class="main-button">Analysis Image</a><br>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>
