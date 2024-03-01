@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Program</title>
+</head>
+<body>
+    <h1>Nutrition Program</h1>
+    {% if role == "solo-client" %}
+        <a href="#">Create Nutrition Program</a><br>
+        <a href="#">View Nutrition Program</a><br>
+        <a href="#">Delete Nutrition Program</a><br>
+    {% elif role == "client" %}
+        <a href="#">View Nutrition Program</a><br>
+    {% elif role == "trainer" %}
+        <a href="#">Create Nutrition Program</a><br>
+        <a href="#">View Nutrition Program</a><br>
+        <a href="#">Delete Nutrition Program</a><br>
+    {% endif %}
+</body>
+</html>

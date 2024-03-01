@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+</head>
+<body>
+    <h1>Welcome, {{ username }}!</h1>
+    <h2>Select an option based on your role:</h2>
+    {% if role == "solo-client" %}
+        <a href="#">Logout</a><br>
+        <a href="#">Change Password</a><br>
+        <a href="/workout_program">Workout Program</a><br>
+        <a href="/nutrition_program">Nutrition Program</a><br>
+        <a href="#">Record Workout</a><br>
+        <a href="#">Record Nutrition Program</a><br>
+        <a href="#">View Progress</a><br>
+        <a href="#">Analyse Data</a><br>
+        <a href="#">Analysis Image</a><br>
+    {% elif role == "client" %}
+        <a href="#">Logout</a><br>
+        <a href="#">Change Password</a><br>
+        <a href="/nutrition_program">Nutrition Program</a><br>
+        <a href="/workout_program">Workout Program</a><br>
+        <a href="#">Record Workout</a><br>
+        <a href="#">Record Nutrition</a><br>
+        <a href="#">View Progress</a><br>
+        <a href="#">Analyse Data</a><br>
+        <a href="#">Analysis Image</a><br>
+    {% elif role == "trainer" %}
+        <a href="#">Logout</a><br>
+        <a href="#">Change Password</a><br>
+        <a href="/nutrition_program">Nutrition Program</a><br>
+        <a href="/workout_program">Workout Program</a><br>
+        <a href="/client">Clients</a><br>
+        <a href="#">Analyse Data</a><br>
+        <a href="#">Analysis Image</a><br>
+    {% endif %}
+</body>
+</html>

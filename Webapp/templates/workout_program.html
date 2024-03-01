@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Program</title>
+</head>
+<body>
+    <h1>Workout Program</h1>
+    {% if role == "solo-client" %}
+        <h2>Your Workout Program</h2>
+        <p>Name: {{ workout.name }}</p>
+        <p>Description: {{ workout.description }}</p>
+        <p>Difficulty: {{ workout.difficulty }}</p>
+    {% elif role == "client" %}
+        <h2>View Workout Program</h2>
+        <p>Name: {{ workout.name }}</p>
+        <p>Description: {{ workout.description }}</p>
+        <p>Difficulty: {{ workout.difficulty }}</p>
+    {% elif role == "trainer" %}
+        <h2>Create New Workout Program</h2>
+        <!-- Form to create a new workout program -->
+        <form action="{{ url_for('create_workout') }}" method="post">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name"><br>
+            <label for="description">Description:</label><br>
+            <textarea id="description" name="description"></textarea><br>
+            <label for="difficulty">Difficulty:</label><br>
+            <input type="text" id="difficulty" name="difficulty"><br>
+            <!-- Add button to add exercises -->
+            <button type="button" onclick="showExerciseForm()">Add Exercise</button>
+            <!-- Hidden div for exercise form -->
+            <div id="exerciseForm" style="display: none;">
+                <label for="exercise">Select Exercise:</label>
+<select id="exercise" name="exercise_ids">
+    {% for exercise in exercises %}
+        <option value="{{ exercise.e_id }}">{{ exercise.name }}</option>
+    {% endfor %}
+</select>
+                <!-- Additional information about the selected exercise will be displayed here -->
+                <div id="exerciseInfo"></div>
+            </div><br>
+            <input type="submit" value="Create">
+        </form>
+        <h2>View Workout Programs</h2>
+        <!-- List of workout programs with delete links -->
+        <ul>
+            {% for workout in workouts %}
+                <li>
+                    <p>Name: {{ workout.name }}</p>
+                    <p>Description: {{ workout.description }}</p>
+                    <p>Difficulty: {{ workout.difficulty }}</p>
+                    <p>Exercises:</p>
+                    <ul>
+                        {% for exercise in workout.exercises %}
+                            <li>{{ exercise.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ url_for('delete_workout', id=workout.workout_id) }}">Delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <script>
+        function showExerciseForm() {
+            var exerciseForm = document.getElementById("exerciseForm");
+            exerciseForm.style.display = "block";
+        }
+    </script>
+</body>
+</html>
