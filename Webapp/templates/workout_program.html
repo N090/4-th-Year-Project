@@ -7,17 +7,7 @@
 </head>
 <body>
     <h1>Workout Program</h1>
-    {% if role == "solo-client" %}
-        <h2>Your Workout Program</h2>
-        <p>Name: {{ workout.name }}</p>
-        <p>Description: {{ workout.description }}</p>
-        <p>Difficulty: {{ workout.difficulty }}</p>
-    {% elif role == "client" %}
-        <h2>View Workout Program</h2>
-        <p>Name: {{ workout.name }}</p>
-        <p>Description: {{ workout.description }}</p>
-        <p>Difficulty: {{ workout.difficulty }}</p>
-    {% elif role == "trainer" %}
+    {% if role == "trainer" %}
         <h2>Create New Workout Program</h2>
         <!-- Form to create a new workout program -->
         <form id="createWorkoutForm" action="{{ url_for('create_workout') }}" method="post">
@@ -30,77 +20,61 @@
             <!-- Add button to add exercises -->
             <button type="button" onclick="addExerciseToWorkout()">Add Exercise to Workout</button>
             <!-- Add button to select another exercise -->
-            <button type="button" onclick="resetExerciseSelection()">Select Another Exercise</button>
+            <button type="button" onclick="showExerciseForm()">Select Another Exercise</button>
             <!-- Hidden div for exercise form -->
             <div id="exerciseForm" style="display: none;">
                 <label for="exercise">Select Exercise:</label>
-                <select id="exercise" name="exercise_ids" onchange="fetchExerciseDetails()">
+                <select id="exercise" name="exercise_ids" onchange="fetchExerciseDetails()"> <!-- Add onchange event -->
+                    <option value="">Select Exercise</option>
                     {% for exercise in exercises %}
                         <option value="{{ exercise.e_id }}">{{ exercise.name }}</option>
                     {% endfor %}
-                </select>
+                </select><br>
+                
+                <label for="sets">Sets:</label>
+                <input type="text" id="sets" name="sets"><br>
+                <label for="reps">Reps:</label>
+                <input type="text" id="reps" name="reps"><br>
                 <!-- Additional information about the selected exercise will be displayed here -->
                 <div id="exerciseDetails"></div>
             </div><br>
             <input type="submit" value="Create">
         </form>
-        <h2>View Workout Programs</h2>
-        <!-- List of workout programs with delete links -->
-        <ul>
-            {% for workout in workouts %}
-                <li>
-                    <p>Name: {{ workout.name }}</p>
-                    <p>Description: {{ workout.description }}</p>
-                    <p>Difficulty: {{ workout.difficulty }}</p>
-                    <p>Exercises:</p>
-                    <ul>
-                        {% for exercise in workout.exercises %}
-                            <li>{{ exercise.name }}</li>
-                        {% endfor %}
-                    </ul>
-                    <a href="{{ url_for('delete_workout', id=workout.workout_id) }}">Delete</a>
-                </li>
-            {% endfor %}
-        </ul>
     {% endif %}
     <script>
         function showExerciseForm() {
             var exerciseForm = document.getElementById("exerciseForm");
             exerciseForm.style.display = "block";
         }
-        
         function fetchExerciseDetails() {
-            var exerciseId = document.getElementById("exercise").value;
-            fetch("/exercise_details/" + exerciseId)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Exercise details:", data);  // Debugging statement
-                    var exerciseDetails = "<p>Name: " + data.name + "</p>";
-                    exerciseDetails += "<p>Description: " + data.description + "</p>";
-                    exerciseDetails += "<p>Muscle Group: " + data.muscle_group.join(", ") + "</p>";
-                    exerciseDetails += "<p>Equipment: " + data.equipment + "</p>";
-                    document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
-                })
-                .catch(error => console.error('Error fetching exercise details:', error));
-        }
+        var exerciseId = document.getElementById("exercise").value;
+        fetch("/exercise_details/" + exerciseId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Exercise details:", data);  // Debugging statement
+                var exerciseDetails = "<p>Name: " + data.name + "</p>";
+                exerciseDetails += "<p>Description: " + data.description + "</p>";
+                exerciseDetails += "<p>Muscle Group: " + data.muscle_group.join(", ") + "</p>";
+                exerciseDetails += "<p>Equipment: " + data.equipment + "</p>";
+                exerciseDetails += "<p>Sets: " + data.sets + "</p>";
+                exerciseDetails += "<p>Reps: " + data.reps + "</p>";
+                document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
+            })
+            .catch(error => console.error('Error fetching exercise details:', error));
+    }
 
-        function addExerciseToWorkout() {
-            var exerciseId = document.getElementById("exercise").value;
-            // Add logic to add exercise to workout program (you need to implement this)
-            console.log("Exercise added to workout:", exerciseId);
-        }
-
-        function resetExerciseSelection() {
-            // Reset exercise selection to default
-            document.getElementById("exercise").selectedIndex = 0;
-            // Clear exercise details
-            document.getElementById("exerciseDetails").innerHTML = "";
-        }
+    function addExerciseToWorkout() {
+        var exerciseId = document.getElementById("exercise").value;
+        var sets = document.getElementById("sets").value;
+        var reps = document.getElementById("reps").value;
+        // Add logic to add exercise to workout program (you need to implement this)
+        console.log("Exercise added to workout:", exerciseId, "Sets:", sets, "Reps:", reps);
+    }
     </script>    
 </body>
 </html>

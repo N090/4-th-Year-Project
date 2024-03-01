@@ -170,10 +170,13 @@ def exercise_details(exercise_id):
             'name': exercise.name,
             'description': exercise.description,
             'muscle_group': exercise.muscle_group,
-            'equipment': exercise.equipment
+            'equipment': exercise.equipment,
+            'sets': exercise.sets,
+            'reps': exercise.reps
         })
     else:
         return jsonify({'error': 'Exercise not found'}), 404
+
 
 @app.route('/client')
 def client():
