@@ -1,16 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 roles = ["solo-client", "client", "trainer"]
 
-# Define the Flask app
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Add a secret key for session management
+app.secret_key = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@127.0.0.1/swiftlift'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Create the SQLAlchemy instance
 db = SQLAlchemy(app)
 
 # Define User model
@@ -33,20 +31,27 @@ class Exercises(db.Model):
     description = db.Column(db.String(255))
     muscle_group = db.Column(db.ARRAY(db.String(50)), nullable=False)
     equipment = db.Column(db.String(100), nullable=False)
+    sets = db.Column(db.Integer)
+    reps = db.Column(db.Integer)
 
-# Define WorkoutProgram model
 class WorkoutProgram(db.Model):
     __tablename__ = 'workout_program'
+
     workout_id = db.Column(db.Integer, primary_key=True)
     w_name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(255))
     difficulty = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
 
+    owner = db.relationship('User', backref=db.backref('owned_workout_programs', lazy=True))
+
 class WorkoutProgramExercises(db.Model):
     __tablename__ = 'workout_exercises'
+
     workout_id = db.Column(db.Integer, db.ForeignKey('workout_program.workout_id'), primary_key=True)
-    exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.e_id'), primary_key=True)
+    exercise_id = db.Column(db.Integer, db.ForeignKey('Exercises.e_id'), primary_key=True)
+
+    exercise = db.relationship('Exercises')     
 
 # Home page
 @app.route('/')
@@ -82,7 +87,7 @@ def login():
 
         user = User.query.filter_by(username=username, password=password).first()
         if user:
-            session['username'] = username  # Store username in session
+            session['username'] = username
             return redirect(url_for('main'))
         else:
             return render_template('login.html', message='Invalid username or password')
@@ -99,7 +104,6 @@ def main():
             return render_template('main.html', username=username, role=user.role)
     return redirect(url_for('login'))
 
-# Update the Flask route for workout_program to pass the exercises variable
 @app.route('/workout_program')
 def workout_program():
     username = session.get('username')
@@ -107,20 +111,15 @@ def workout_program():
         user = User.query.filter_by(username=username).first()
         if user:
             if user.role == "solo-client" or user.role == "client":
-                # Get the workout program for the user
                 workout = WorkoutProgram.query.filter_by(user_id=user.id).first()
-                # Query all exercises
                 exercises = Exercises.query.all()
                 return render_template('workout_program.html', role=user.role, workout=workout, exercises=exercises)
             elif user.role == "trainer":
-                # Get all workout programs for the trainer
                 workouts = WorkoutProgram.query.all()
-                # Query all exercises
                 exercises = Exercises.query.all()
                 return render_template('workout_program.html', role=user.role, workouts=workouts, exercises=exercises)
     return redirect(url_for('login'))
 
-# Update the Flask route to use the Exercise model
 @app.route('/create_workout', methods=['POST'])
 def create_workout():
     if request.method == 'POST':
@@ -132,12 +131,10 @@ def create_workout():
                 description = request.form['description']
                 difficulty = request.form['difficulty']
                 
-                # Create a new workout program
                 new_workout = WorkoutProgram(w_name=w_name, description=description, difficulty=difficulty, user_id=user.id)
                 db.session.add(new_workout)
                 db.session.commit()
                 
-                # Query exercises from the database
                 exercises = Exercises.query.all()
                 
                 return render_template('workout_program.html', role=user.role, exercises=exercises)
@@ -150,16 +147,12 @@ def delete_workout(id):
     if username:
         user = User.query.filter_by(username=username).first()
         if user and user.role == "trainer":
-            # Delete associated exercises
             WorkoutProgramExercises.query.filter_by(workout_id=id).delete()
-            
-            # Delete the workout program
             workout = WorkoutProgram.query.get(id)
             db.session.delete(workout)
             db.session.commit()
     return redirect(url_for('workout_program'))
 
-# Nutrition Program route
 @app.route('/nutrition_program')
 def nutrition_program():
     username = session.get('username')
@@ -169,7 +162,19 @@ def nutrition_program():
             return render_template('nutrition_program.html', role=user.role)
     return redirect(url_for('login'))
 
-# Client route
+@app.route('/exercise_details/<int:exercise_id>')
+def exercise_details(exercise_id):
+    exercise = Exercises.query.get(exercise_id)
+    if exercise:
+        return jsonify({
+            'name': exercise.name,
+            'description': exercise.description,
+            'muscle_group': exercise.muscle_group,
+            'equipment': exercise.equipment
+        })
+    else:
+        return jsonify({'error': 'Exercise not found'}), 404
+
 @app.route('/client')
 def client():
     username = session.get('username')
