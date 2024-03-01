@@ -3,11 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 roles = ["solo-client", "client", "trainer"]
+
+# Define the Flask app
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Add a secret key for session management
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@127.0.0.1/swiftlift'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Create the SQLAlchemy instance
 db = SQLAlchemy(app)
 
 # Define User model
@@ -42,7 +45,7 @@ class WorkoutProgram(db.Model):
 
 class WorkoutProgramExercises(db.Model):
     __tablename__ = 'workout_exercises'
-    workout_id = db.Column(db.Integer, db.ForeignKey('workout_programs.workout_id'), primary_key=True)
+    workout_id = db.Column(db.Integer, db.ForeignKey('workout_program.workout_id'), primary_key=True)
     exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.e_id'), primary_key=True)
 
 # Home page
