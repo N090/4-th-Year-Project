@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Exercises</title>
+</head>
+<body>
+    <h1>Add Exercises to Workout</h1>
+    <!-- Form for adding exercises -->
+    <form id="addExercisesForm" action="{{ url_for('add_exercises_to_workout', workout_id=workout_id) }}" method="post">
+        <!-- Exercise details -->
+        <label for="exercise">Select Exercise:</label>
+        <select id="exercise" name="exercise_id" class="form-workout" onchange="fetchExerciseDetails()">
+            <option value="">Select Exercise</option>
+            {% for exercise in exercises %}
+            <option value="{{ exercise.e_id }}">{{ exercise.name }}</option>
+            {% endfor %}
+        </select><br>
+        <!-- Exercise details display -->
+        <div id="exerciseDetails"></div><br>
+        <!-- Sets and Reps -->
+        <label for="sets">Sets:</label>
+        <input type="text" id="sets" name="sets" class="form-workout"><br>
+        <label for="reps">Reps:</label>
+        <input type="text" id="reps" name="reps" class="form-workout"><br>
+        <!-- Submit button to add exercise -->
+        <input type="submit" value="Add Exercise" class="main-button">
+    </form>
+
+    <!-- Display current exercises added to the current workout -->
+    <h2>Current Exercises:</h2>
+    <ul>
+        {% for exercise in current_workout_exercises %}
+        <li>{{ exercise.exercise.name }} - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
+            <form method="post" action="{{ url_for('remove_exercise', workout_id=workout_id, exercise_id=exercise.exercise.e_id) }}">
+                <button type="submit">Remove</button>
+                <input type="hidden" name="exercise_id" value="{{ exercise.exercise.e_id }}">
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- JavaScript to fetch exercise details -->
+    <script>
+        function fetchExerciseDetails() {
+            var exerciseId = document.getElementById("exercise").value;
+            fetch("/exercise_details/" + exerciseId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var exerciseDetails = "<p><strong>Name:</strong> " + data.name + "</p>";
+                    exerciseDetails += "<p><strong>Description:</strong> " + data.description + "</p>";
+                    exerciseDetails += "<p><strong>Muscle Group:</strong> " + data.muscle_group.join(", ") + "</p>";
+                    exerciseDetails += "<p><strong>Equipment:</strong> " + data.equipment + "</p>";
+                    document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
+                })
+                .catch(error => console.error('Error fetching exercise details:', error));
+        }
+    </script>
+</body>
+</html>

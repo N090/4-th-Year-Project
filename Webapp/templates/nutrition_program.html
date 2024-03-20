@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nutrition Program</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <style>
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+    <a href="{{ url_for('main') }}" class="home-button">
+        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" width="40" height="40">
+    </a>
     <div class="nutrition-container">
         <h1>Nutrition Program</h1>
         {% if role == "solo-client" %}

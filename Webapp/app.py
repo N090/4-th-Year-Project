@@ -13,7 +13,7 @@ db = SQLAlchemy(app)
 
 # Define User model
 class User(db.Model):
-    __tablename__ = 'Users'
+    __tablename__ = 'Users'  # Update table name to 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
@@ -25,14 +25,12 @@ class User(db.Model):
 
 # Define Exercises model
 class Exercises(db.Model):
-    __tablename__ = 'Exercises'
+    __tablename__ = 'exercises'
     e_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(255))
     muscle_group = db.Column(db.ARRAY(db.String(50)), nullable=False)
     equipment = db.Column(db.String(100), nullable=False)
-    sets = db.Column(db.Integer)
-    reps = db.Column(db.Integer)
 
 class WorkoutProgram(db.Model):
     __tablename__ = 'workout_program'
@@ -41,17 +39,19 @@ class WorkoutProgram(db.Model):
     w_name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(255))
     difficulty = db.Column(db.String(10), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)  # Fix foreign key reference
 
     owner = db.relationship('User', backref=db.backref('owned_workout_programs', lazy=True))
+    exercises = db.relationship('Exercises', secondary='workout_exercises')
 
 class WorkoutProgramExercises(db.Model):
     __tablename__ = 'workout_exercises'
-
     workout_id = db.Column(db.Integer, db.ForeignKey('workout_program.workout_id'), primary_key=True)
-    exercise_id = db.Column(db.Integer, db.ForeignKey('Exercises.e_id'), primary_key=True)
+    exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.e_id'), primary_key=True)
+    sets = db.Column(db.Integer)
+    reps = db.Column(db.Integer)
 
-    exercise = db.relationship('Exercises')     
+    exercise = db.relationship('Exercises')
 
 # Home page
 @app.route('/')
@@ -104,25 +104,92 @@ def main():
             return render_template('main.html', username=username, role=user.role)
     return redirect(url_for('login'))
 
-def create_workout_solo():
-    if request.method == 'POST':
-        username = session.get('username')
-        if username:
-            user = User.query.filter_by(username=username).first()
-            if user and (user.role == "solo-client" or user.role == "client"):
-                w_name = request.form['name']
-                description = request.form['description']
-                difficulty = request.form['difficulty']
+
+@app.route('/add_exercises_to_workout/<int:workout_id>', methods=['GET', 'POST'])
+def add_exercises_to_workout(workout_id):
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and (user.role == "solo-client" or user.role == "trainer"):
+            if request.method == 'POST':
+                # Handle form submission to add exercises to the workout
+                exercise_id = request.form['exercise_id']
+                sets = request.form['sets']
+                reps = request.form['reps']
+
+                # Check if the workout_id exists
+                existing_workout = WorkoutProgram.query.get(workout_id)
+                if existing_workout:
+                    # Add the exercise to the workout
+                    workout_exercise = WorkoutProgramExercises(workout_id=workout_id, exercise_id=exercise_id, sets=sets, reps=reps)
+                    db.session.add(workout_exercise)
+                    db.session.commit()
+
+                    # Fetch current exercises added to the workout
+                    current_workout_exercises = WorkoutProgramExercises.query.filter_by(workout_id=workout_id).all()
+
+                    # Render the page to continue adding exercises with current workout exercises displayed
+                    exercises = Exercises.query.all()
+                    return render_template('add_exercises.html', exercises=exercises, workout_id=workout_id, current_workout_exercises=current_workout_exercises)
+
+    # Render the page to add exercises
+    exercises = Exercises.query.all()
+    return render_template('add_exercises.html', exercises=exercises, workout_id=workout_id)
+
+@app.route('/remove_exercise/<int:workout_id>/<int:exercise_id>', methods=['POST'])
+def remove_exercise(workout_id, exercise_id):
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and (user.role == "solo-client" or user.role == "trainer"):
+            exercise_id = request.form['exercise_id']
+
+            # Add logic to remove the exercise from the workout
+            workout_exercise = WorkoutProgramExercises.query.filter_by(workout_id=workout_id, exercise_id=exercise_id).first()
+            if workout_exercise:
+                db.session.delete(workout_exercise)
+                db.session.commit()
+
+    # After removing the exercise, fetch the updated list of exercises for the current workout
+    current_workout_exercises = WorkoutProgramExercises.query.filter_by(workout_id=workout_id).all()
+
+    # Render the page to add exercises with the updated list of exercises
+    exercises = Exercises.query.all()
+    return render_template('add_exercises.html', exercises=exercises, workout_id=workout_id, current_workout_exercises=current_workout_exercises)
+
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if request.method == 'POST':
+                old_password = request.form.get('old_password')
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
                 
-                new_workout = WorkoutProgram(w_name=w_name, description=description, difficulty=difficulty, user_id=user.id)
-                db.session.add(new_workout)
+                if not old_password or not new_password or not confirm_password:
+                    error_message = 'All fields are required.'
+                    return render_template('change_password.html', error_message=error_message)
+
+                if user.password != old_password:
+                    error_message = 'Incorrect old password. Please try again.'
+                    return render_template('change_password.html', error_message=error_message)
+                
+                if new_password != confirm_password:
+                    error_message = 'New passwords do not match. Please try again.'
+                    return render_template('change_password.html', error_message=error_message)
+                
+                # Update the user's password in the database
+                user.password = new_password
                 db.session.commit()
                 
-                exercises = Exercises.query.all()
-                
-                return render_template('workout_program.html', role=user.role, exercises=exercises)
-                
-    return redirect(url_for('workout_program'))
+                success_message = 'Password has been changed successfully!'
+                return render_template('change_password.html', success_message=success_message)
+            else:
+                return render_template('change_password.html')
+    return redirect(url_for('login'))
 
 @app.route('/delete_workout_solo/<int:id>')
 def delete_workout_solo(id):
@@ -147,25 +214,97 @@ def workout_program():
             return render_template('workout_program.html', role=user.role, workouts=workouts, exercises=exercises)
     return redirect(url_for('login'))
 
-@app.route('/create_workout', methods=['POST'])
+# Function to initialize the current workout program in the session
+def initialize_current_workout():
+    session['current_workout'] = {
+        'name': None,
+        'description': None,
+        'difficulty': None,
+        'exercises': []  # List to store added exercises
+    }
+
+# Function to add an exercise to the current workout program
+def add_exercise_to_current_workout(exercise_id, sets, reps):
+    if 'current_workout' not in session:
+        initialize_current_workout()
+    session['current_workout']['exercises'].append({
+        'exercise_id': exercise_id,
+        'sets': sets,
+        'reps': reps
+    })
+
+
+@app.route('/create_workout', methods=['GET', 'POST'])
 def create_workout():
     if request.method == 'POST':
         username = session.get('username')
         if username:
             user = User.query.filter_by(username=username).first()
             if user and user.role == "trainer":
+                # Collect workout details
                 w_name = request.form['name']
                 description = request.form['description']
                 difficulty = request.form['difficulty']
-                
+
+                # Create workout program in the session
+                initialize_current_workout()
+                session['current_workout']['name'] = w_name
+                session['current_workout']['description'] = description
+                session['current_workout']['difficulty'] = difficulty
+
+                # Redirect to the page to add exercises, passing workout_id parameter
                 new_workout = WorkoutProgram(w_name=w_name, description=description, difficulty=difficulty, user_id=user.id)
                 db.session.add(new_workout)
                 db.session.commit()
-                
-                exercises = Exercises.query.all()
-                
-                return render_template('workout_program.html', role=user.role, exercises=exercises)
-                
+
+                # Redirect to the page to add exercises, passing workout_id parameter
+                return redirect(url_for('add_exercises_to_workout', workout_id=new_workout.workout_id))
+
+    return redirect(url_for('workout_program'))
+
+
+# Route for finalizing the workout creation
+@app.route('/finalize_workout', methods=['POST'])
+def finalize_workout():
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and user.role == "trainer":
+            if request.method == 'POST':
+                # Retrieve the current workout program from the session
+                current_workout = session.get('current_workout')
+                if current_workout:
+                    # Create workout program in the database
+                    new_workout = WorkoutProgram(
+                        w_name=current_workout['name'],
+                        description=current_workout['description'],
+                        difficulty=current_workout['difficulty'],
+                        user_id=user.id
+                    )
+                    db.session.add(new_workout)
+                    db.session.commit()
+
+                    # Retrieve the ID of the newly created workout
+                    workout_id = new_workout.workout_id
+
+                    # Add exercises to the workout program
+                    for exercise in current_workout['exercises']:
+                        workout_exercises = WorkoutProgramExercises(
+                            workout_id=workout_id,
+                            exercise_id=exercise['exercise_id'],
+                            sets=exercise['sets'],
+                            reps=exercise['reps']
+                        )
+                        db.session.add(workout_exercises)
+
+                    db.session.commit()
+
+                    # Clear the current workout from session
+                    session.pop('current_workout')
+
+                    # Redirect to the workout program page
+                    return redirect(url_for('workout_program'))
+
     return redirect(url_for('workout_program'))
 
 @app.route('/delete_workout/<int:id>')
@@ -198,8 +337,6 @@ def exercise_details(exercise_id):
             'description': exercise.description,
             'muscle_group': exercise.muscle_group,
             'equipment': exercise.equipment,
-            'sets': exercise.sets,
-            'reps': exercise.reps
         })
     else:
         return jsonify({'error': 'Exercise not found'}), 404
@@ -218,7 +355,6 @@ def client():
 def logout():
     session.pop('username', None)
     return redirect(url_for('homepage'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)

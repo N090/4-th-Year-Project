@@ -132,13 +132,6 @@ ul.workout li.workout button:hover {
     background-color: #4CAF50;
 }
 
-/* Styles for Clients page */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-}
-
 .client-container {
     max-width: 800px;
     margin: 20px auto;
@@ -229,4 +222,66 @@ h1 {
 
 .main-button:hover {
     background-color: #4CAF50;
+}
+
+/* Change Password container */
+.cp-container {
+    width: 400px; /* Adjust the width as needed */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Center horizontally */
+}
+
+/* Change Password content */
+.cp-content {
+    text-align: center;
+}
+
+/* Change Password form */
+.cp-form {
+    margin-top: 20px;
+}
+
+.cp-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.cp-form input[type="password"],
+.cp-form input[type="submit"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Error message */
+.cp-error-message {
+    margin-top: 10px;
+    color: red;
+}
+
+/* Success message */
+.cp-success-message {
+    margin-top: 10px;
+    color: green;
+}
+.cp-button:hover {
+    background-color: #4CAF50;
+}
+.cp-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
 }
