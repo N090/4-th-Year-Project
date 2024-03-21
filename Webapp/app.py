@@ -125,12 +125,12 @@ def add_exercises_to_workout(workout_id):
                     db.session.add(workout_exercise)
                     db.session.commit()
 
-                    # Fetch current exercises added to the workout
-                    current_workout_exercises = WorkoutProgramExercises.query.filter_by(workout_id=workout_id).all()
+            # Fetch current exercises added to the workout
+            current_workout_exercises = WorkoutProgramExercises.query.filter_by(workout_id=workout_id).all()
 
-                    # Render the page to continue adding exercises with current workout exercises displayed
-                    exercises = Exercises.query.all()
-                    return render_template('add_exercises.html', exercises=exercises, workout_id=workout_id, current_workout_exercises=current_workout_exercises)
+            # Render the page to continue adding exercises with current workout exercises displayed
+            exercises = Exercises.query.all()
+            return render_template('add_exercises.html', exercises=exercises, workout_id=workout_id, current_workout_exercises=current_workout_exercises)
 
     # Render the page to add exercises
     exercises = Exercises.query.all()

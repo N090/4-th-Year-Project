@@ -4,8 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Exercises</title>
+    <!-- Link to your stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <!-- Inline CSS for the home button -->
+    <style>
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+    <!-- Home button -->
+    <a href="{{ url_for('main') }}" class="home-button">
+        <!-- Adjust the path to your home.png file -->
+        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" width="40" height="40">
+    </a>
+
     <h1>Add Exercises to Workout</h1>
     <!-- Form for adding exercises -->
     <form id="addExercisesForm" action="{{ url_for('add_exercises_to_workout', workout_id=workout_id) }}" method="post">
@@ -41,7 +58,10 @@
         {% endfor %}
     </ul>
 
-    <!-- JavaScript to fetch exercise details -->
+    <!-- Button to go back to the workout program page -->
+    <button onclick="goBackToWorkoutProgram()">Go Back to Workout Program</button>
+
+    <!-- JavaScript to fetch exercise details and go back to the previous page -->
     <script>
         function fetchExerciseDetails() {
             var exerciseId = document.getElementById("exercise").value;
@@ -60,6 +80,10 @@
                     document.getElementById("exerciseDetails").innerHTML = exerciseDetails;
                 })
                 .catch(error => console.error('Error fetching exercise details:', error));
+        }
+
+        function goBackToWorkoutProgram() {
+            window.location.href = "{{ url_for('workout_program') }}";
         }
     </script>
 </body>
