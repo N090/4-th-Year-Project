@@ -22,6 +22,8 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)
     # Define relationship with WorkoutProgram
     workout_programs = db.relationship('WorkoutProgram', backref='user', lazy=True)
+    nutrition_programs = db.relationship('NutritionProgram', backref='user', lazy=True)
+
 
 # Define Exercises model
 class Exercises(db.Model):
@@ -52,6 +54,31 @@ class WorkoutProgramExercises(db.Model):
     reps = db.Column(db.Integer)
 
     exercise = db.relationship('Exercises')
+
+class Food(db.Model):
+    __tablename__ = 'food'
+    food_id = db.Column(db.Integer, primary_key=True)
+    food_name = db.Column(db.String(50), nullable=False)
+    calories_serving = db.Column(db.Numeric, nullable=False)
+    serving_size = db.Column(db.String(20), nullable=False)
+    carbs = db.Column(db.Integer, nullable=False)
+    fat = db.Column(db.Integer, nullable=False)
+    protein = db.Column(db.Integer, nullable=False)
+
+class Meal(db.Model):
+    __tablename__ = 'meal'
+    meal_id = db.Column(db.Integer, primary_key=True)
+    meal_name = db.Column(db.String(50))
+    nutrition_programs = db.relationship('NutritionProgram', backref='meal', lazy=True)
+
+class NutritionProgram(db.Model):
+    __tablename__ = 'nutrition_program'
+    n_id = db.Column(db.Integer, primary_key=True)
+    meal_id = db.Column(db.Integer, db.ForeignKey('meal.meal_id'), nullable=False)
+    food_id = db.Column(db.Integer, db.ForeignKey('food.food_id'), nullable=False)
+    serving_size = db.Column(db.String(20), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
+
 
 # Home page
 @app.route('/')
@@ -307,17 +334,22 @@ def finalize_workout():
 
     return redirect(url_for('workout_program'))
 
-@app.route('/delete_workout/<int:id>')
+@app.route('/delete_workout/<int:id>', methods=['POST'])
 def delete_workout(id):
     username = session.get('username')
     if username:
         user = User.query.filter_by(username=username).first()
         if user and user.role == "trainer":
-            WorkoutProgramExercises.query.filter_by(workout_id=id).delete()
+            # Check if the workout with the given ID exists
             workout = WorkoutProgram.query.get(id)
-            db.session.delete(workout)
-            db.session.commit()
+            if workout:
+                # Delete associated workout exercises
+                WorkoutProgramExercises.query.filter_by(workout_id=id).delete()
+                # Delete the workout
+                db.session.delete(workout)
+                db.session.commit()
     return redirect(url_for('workout_program'))
+
 
 @app.route('/nutrition_program')
 def nutrition_program():

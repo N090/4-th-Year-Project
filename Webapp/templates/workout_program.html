@@ -30,22 +30,30 @@
             <label for="description">Description:</label><br>
             <textarea id="description" name="description"></textarea><br>
             <label for="difficulty">Difficulty:</label><br>
-            <input type="text" id="difficulty" name="difficulty"><br>
+            <select id="difficulty" name="difficulty">
+                <option value="1">Easy</option>
+                <option value="2">Medium</option>
+                <option value="3">Hard</option>
+                <option value="4">Professional</option>
+            </select><br>
             <input type="submit" value="Add Exercises" class="main-button">
         </form>
         {% endif %}
         
-        <!-- View Workouts -->
-        <h2 class="h2-workout">View Workouts</h2>
-        <ul class="ul-workout">
-            {% for workout in workouts %}
-            <li class="li-workout">{{ workout.name }} - {{ workout.description }} (Difficulty: {{ workout.difficulty }})
-                {% if role == "trainer" %}
-                <button onclick="deleteWorkout('{{ workout.workout_id }}')" class="main-button">Delete</button>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
+      <!-- View Workouts -->
+<h2 class="h2-workout">View Workouts</h2>
+<ul class="ul-workout">
+    {% for workout in workouts %}
+    <li class="li-workout">{{ workout.w_name }} - {{ workout.description }} (Difficulty: {{ workout.difficulty }})
+        {% if role == "trainer" %}
+        <form action="{{ url_for('delete_workout', id=workout.workout_id) }}" method="post" style="display: inline;">
+            <button type="submit" class="main-button">Delete</button>
+        </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
     </div>
 </body>
 </html>
