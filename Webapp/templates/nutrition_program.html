@@ -35,30 +35,28 @@
         <!-- Add a form to create a new nutrition program -->
         {% if role == "trainer" %}
         <h2 class="h2-nutrition">New Nutrition Program</h2>
-        <form class="form-nutrition" id="createNutritionForm" action="{{ url_for('nutrition_program') }}" method="post">
-            <label for="meal_id">Meal:</label><br>
-            <select id="meal_id" name="meal_id">
-                {% for meal in meals %}
-                <option value="{{ meal.meal_id }}">{{ meal.meal_name }}</option>
-                {% endfor %}
-            </select><br>
-            <label for="food_id">Food:</label><br>
+        <form action="{{ url_for('add_food', meal_id=meal_id) }}" method="POST">
+            <label for="food_id">Food:</label>
             <select id="food_id" name="food_id">
+                <option value="" selected disabled>Select Food</option>
                 {% for food in foods %}
                 <option value="{{ food.food_id }}">{{ food.food_name }}</option>
                 {% endfor %}
-            </select><br>
-            <label for="serving_size">Serving Size:</label><br>
-            <input type="text" id="serving_size" name="serving_size"><br>
-            <input type="submit" value="Add Nutrition" class="main-button">
+            </select>
+            <br>
+            <label for="serving_size">Serving Size:</label>
+            <input type="text" id="serving_size" name="serving_size" required>
+            <br>
+            <input type="submit" value="Add Food" class="main-button">
         </form>
+        
         {% endif %}
 
         <!-- View Nutrition Programs -->
         <h2 class="h2-nutrition">View Nutrition Programs</h2>
         <ul class="ul-nutrition">
             {% for program in nutrition_programs %}
-            <li class="li-nutrition">{{ program.meal.meal_name }} - {{ program.food.food_name }} (Serving Size: {{ program.serving_size }})
+            <li class="li-nutrition">{{ program.meal.meal_name }} - {{ program.food.food_name }}
                 {% if role == "trainer" %}
                 <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
                     <button type="submit" class="main-button">Delete</button>
@@ -68,5 +66,22 @@
             {% endfor %}
         </ul>
     </div>
+
+    <!-- JavaScript to fetch meal data -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/fetch_meal')
+                .then(response => response.json())
+                .then(data => {
+                    const mealDropdown = document.getElementById('meal_id');
+                    data.forEach(meal => {
+                        const option = document.createElement('option');
+                        option.value = meal.meal_id;
+                        option.text = meal.meal_name;
+                        mealDropdown.appendChild(option);
+                    });
+                });
+        });
+    </script>
 </body>
 </html>

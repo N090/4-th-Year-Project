@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Food to Meal</title>
+    <!-- Link to your stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <!-- Inline CSS for the home button -->
+    <style>
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Home button -->
+    <a href="{{ url_for('main') }}" class="home-button">
+        <!-- Adjust the path to your home.png file -->
+        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" width="40" height="40">
+    </a>
+
+    <h1>Add Food to Meal</h1>
+    <!-- Form for adding food -->
+    <form id="addFoodForm" action="{{ url_for('add_food_to_meal', meal_id=meal_id) }}" method="post">
+        <!-- Add input fields for food_id and serving_size -->
+        <label for="food_id">Food ID:</label>
+        <input type="text" id="food_id" name="food_id">
+    
+        <label for="serving_size">Serving Size:</label>
+        <input type="text" id="serving_size" name="serving_size">
+        
+        <!-- Add a submit button -->
+        <button type="submit">Add Food</button>
+    </form>
+    
+    <!-- Placeholder for displaying food details -->
+    <div id="foodDetails"></div>
+    
+    <!-- JavaScript to fetch food details -->
+    <script>
+        function fetchFoodDetails() {
+            var foodId = document.getElementById("food_id").value;
+            fetch("/food_details/" + foodId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Display food details in a different way, for example:
+                    var foodDetails = "<p><strong>Name:</strong> " + data.name + "</p>";
+                    foodDetails += "<p><strong>Calories:</strong> " + data.calories + "</p>";
+                    foodDetails += "<p><strong>Protein:</strong> " + data.protein + "</p>";
+                    foodDetails += "<p><strong>Carbohydrates:</strong> " + data.carbohydrates + "</p>";
+                    foodDetails += "<p><strong>Fat:</strong> " + data.fat + "</p>";
+                    document.getElementById("foodDetails").innerHTML = foodDetails;
+                })
+                .catch(error => console.error('Error fetching food details:', error));
+        }
+    </script>
+</body>
+</html>

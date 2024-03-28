@@ -76,7 +76,7 @@ class NutritionProgram(db.Model):
     n_id = db.Column(db.Integer, primary_key=True)
     meal_id = db.Column(db.Integer, db.ForeignKey('meal.meal_id'), nullable=False)
     food_id = db.Column(db.Integer, db.ForeignKey('food.food_id'), nullable=False)
-    serving_size = db.Column(db.String(20), nullable=False)
+    serving_size = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
 
 
@@ -350,15 +350,116 @@ def delete_workout(id):
                 db.session.commit()
     return redirect(url_for('workout_program'))
 
-
 @app.route('/nutrition_program')
 def nutrition_program():
     username = session.get('username')
     if username:
         user = User.query.filter_by(username=username).first()
         if user:
-            return render_template('nutrition_program.html', role=user.role)
+            # Fetch meals from the database
+            meals = Meal.query.all()  # Assuming Meal is the model for storing meals
+            return render_template('nutrition_program.html', role=user.role, meals=meals)
     return redirect(url_for('login'))
+
+
+# Function to initialize the current nutrition program in the session
+def initialize_current_nutrition():
+    session['current_nutrition'] = {
+        'name': None,
+        'description': None,
+        'calories': None,
+        'meals': []  # List to store added meals
+    }
+
+# Function to add a meal to the current nutrition program
+def add_meal_to_current_nutrition(meal_id, name, description):
+    if 'current_nutrition' not in session:
+        initialize_current_nutrition()
+    session['current_nutrition']['meals'].append({
+        'meal_id': meal_id,
+        'name': name,
+        'description': description
+    })
+
+
+@app.route('/add_food/<int:meal_id>', methods=['GET', 'POST'])
+def add_food(meal_id):
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and user.role == "trainer":  # Adjust this condition based on who can add foods
+            if request.method == 'POST':
+                # Retrieve form data
+                food_id = request.form['food_id']
+                serving_size = request.form['serving_size']
+
+                # Create a new nutrition program entry
+                new_nutrition_program = NutritionProgram(meal_id=meal_id, food_id=food_id, serving_size=serving_size, user_id=user.id)
+                db.session.add(new_nutrition_program)
+                db.session.commit()
+
+                # Redirect to a confirmation page or the main page
+                return redirect(url_for('nutrition_program'))
+
+            else:  # If it's a GET request, render the form to add foods
+                # Fetch meals and foods data
+                meals = Meal.query.all()  # Adjust this query as needed
+                foods = Food.query.all()  # Adjust this query as needed
+
+                # Instantiate the meal with the given meal_id
+                meal = Meal.query.get_or_404(meal_id)
+                if meal:
+                    return render_template('add_food.html', meal_id=meal_id, meals=meals, foods=foods)
+
+    return redirect(url_for('login'))
+
+@app.route('/add_food_to_meal/<int:meal_id>', methods=['POST'])
+def add_food_to_meal(meal_id):
+    if request.method == 'POST':
+        # Retrieve data from the form
+        food_id = request.form['food_id']
+        serving_size = request.form['serving_size']
+        
+        # Perform any necessary validations
+        
+        # Add the food to the meal in the database
+        meal = Meal.query.get_or_404(meal_id)
+        food = Food.query.get_or_404(food_id)
+        new_nutrition_program = NutritionProgram(meal_id=meal_id, food_id=food_id, serving_size=serving_size)
+        db.session.add(new_nutrition_program)
+        db.session.commit()
+        
+        # Assuming you have a success message to display
+        return "Food added to the meal successfully!"
+
+    else:
+        # Handle other HTTP methods if needed
+        return "Method not allowed", 405  # Method Not Allowed error
+
+@app.route('/fetch_food')
+def fetch_food():
+    # Select all columns from the food table
+    foods = Food.query.with_entities(
+        Food.food_id,
+        Food.food_name,
+        Food.calories_serving,
+        Food.serving_size,
+        Food.carbs,
+        Food.fat,
+        Food.protein
+    ).all()
+    # Convert food data to JSON format
+    food_data = [{'food_id': food.food_id, 'food_name': food.food_name, 'calories_serving': food.calories_serving,
+                  'serving_size': food.serving_size, 'carbs': food.carbs, 'fat': food.fat, 'protein': food.protein}
+                 for food in foods]
+    # Return JSON response
+    return jsonify(food_data)
+
+@app.route('/fetch_meal')
+def fetch_meal():
+    meals = Meal.query.all()
+    meal_data = [{'meal_id': meal.meal_id, 'meal_name': meal.meal_name} for meal in meals]
+    return jsonify(meal_data)
 
 @app.route('/exercise_details/<int:exercise_id>')
 def exercise_details(exercise_id):
@@ -372,7 +473,6 @@ def exercise_details(exercise_id):
         })
     else:
         return jsonify({'error': 'Exercise not found'}), 404
-
 
 @app.route('/client')
 def client():
