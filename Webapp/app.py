@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy import func
+
 
 roles = ["solo-client", "client", "trainer"]
 
@@ -22,7 +24,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)
     # Define relationship with WorkoutProgram
     workout_programs = db.relationship('WorkoutProgram', backref='user', lazy=True)
-    nutrition_programs = db.relationship('NutritionProgram', backref='user', lazy=True)
+    nutrition_programs = db.relationship('NutritionProgram', backref='nutrition_programs_user', lazy=True)
 
 
 # Define Exercises model
@@ -78,7 +80,10 @@ class NutritionProgram(db.Model):
     food_id = db.Column(db.Integer, db.ForeignKey('food.food_id'), nullable=False)
     serving_size = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
+    n_description = db.Column(db.Text)
+    n_difficulty = db.Column(db.String(20))
 
+    user = db.relationship("User")
 
 # Home page
 @app.route('/')
@@ -358,9 +363,12 @@ def nutrition_program():
         if user:
             # Fetch meals from the database
             meals = Meal.query.all()  # Assuming Meal is the model for storing meals
-            return render_template('nutrition_program.html', role=user.role, meals=meals)
+            
+            # Retrieve meal_id from the session if set
+            meal_id = session.get('current_meal_id')
+            
+            return render_template('nutrition_program.html', roles=roles, meals=meals, meal_id=meal_id)
     return redirect(url_for('login'))
-
 
 # Function to initialize the current nutrition program in the session
 def initialize_current_nutrition():
@@ -381,37 +389,57 @@ def add_meal_to_current_nutrition(meal_id, name, description):
         'description': description
     })
 
+# Function to initialize the current meal in the session
+def initialize_current_meal():
+    session['current_meal'] = {
+        'meal_name': None,
+        'description': None,
+        'foods': []  # List to store added foods
+    }
+
 
 @app.route('/add_food/<int:meal_id>', methods=['GET', 'POST'])
 def add_food(meal_id):
+    # Check if the user is logged in
     username = session.get('username')
-    if username:
+    if not username:
+        return redirect(url_for('login'))
+
+    # Handle POST request to add food to meal
+    if request.method == 'POST':
+        # Fetch user and validate role
         user = User.query.filter_by(username=username).first()
-        if user and user.role == "trainer":  # Adjust this condition based on who can add foods
-            if request.method == 'POST':
-                # Retrieve form data
-                food_id = request.form['food_id']
-                serving_size = request.form['serving_size']
+        if not user or user.role != "trainer":
+            return redirect(url_for('login'))  # Redirect if user is not a trainer
 
-                # Create a new nutrition program entry
-                new_nutrition_program = NutritionProgram(meal_id=meal_id, food_id=food_id, serving_size=serving_size, user_id=user.id)
-                db.session.add(new_nutrition_program)
-                db.session.commit()
+        # Retrieve form data
+        food_id = request.form.get('food_id')
+        serving_size = request.form.get('serving_size')
 
-                # Redirect to a confirmation page or the main page
-                return redirect(url_for('nutrition_program'))
+        # Create a new nutrition program entry
+        new_nutrition_program = NutritionProgram(
+            meal_id=meal_id,
+            food_id=food_id,
+            serving_size=serving_size,
+            user_id=user.id
+        )
+        db.session.add(new_nutrition_program)
+        db.session.commit()
 
-            else:  # If it's a GET request, render the form to add foods
-                # Fetch meals and foods data
-                meals = Meal.query.all()  # Adjust this query as needed
-                foods = Food.query.all()  # Adjust this query as needed
+        # Redirect to the nutrition program page
+        return redirect(url_for('nutrition_program'))
 
-                # Instantiate the meal with the given meal_id
-                meal = Meal.query.get_or_404(meal_id)
-                if meal:
-                    return render_template('add_food.html', meal_id=meal_id, meals=meals, foods=foods)
+    # Handle GET request to render the form to add foods
+    else:
+        # Fetch meals and foods data
+        foods = Food.query.all()
+        
+        # Set the current meal id in the session
+        session['current_meal_id'] = meal_id
 
-    return redirect(url_for('login'))
+        return render_template('add_food.html', meal_id=meal_id, foods=foods)
+
+
 
 @app.route('/add_food_to_meal/<int:meal_id>', methods=['POST'])
 def add_food_to_meal(meal_id):

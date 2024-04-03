@@ -12,6 +12,16 @@
             left: 10px;
             cursor: pointer;
         }
+        .nutrition-btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -32,24 +42,13 @@
             </div>            
         {% endif %}
 
-        <!-- Add a form to create a new nutrition program -->
+        <!-- Add a button to navigate to add_food.html -->
         {% if role == "trainer" %}
-        <h2 class="h2-nutrition">New Nutrition Program</h2>
-        <form action="{{ url_for('add_food', meal_id=meal_id) }}" method="POST">
-            <label for="food_id">Food:</label>
-            <select id="food_id" name="food_id">
-                <option value="" selected disabled>Select Food</option>
-                {% for food in foods %}
-                <option value="{{ food.food_id }}">{{ food.food_name }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <label for="serving_size">Serving Size:</label>
-            <input type="text" id="serving_size" name="serving_size" required>
-            <br>
-            <input type="submit" value="Add Food" class="main-button">
-        </form>
-        
+            <div class="nutrition-btn-container">
+                <form action="{{ url_for('add_food', meal_id=meal_id) }}" method="GET">
+                    <button type="submit" class="nutrition-btn">Create a Meal</button>
+                </form>  
+            </div>
         {% endif %}
 
         <!-- View Nutrition Programs -->
@@ -66,22 +65,5 @@
             {% endfor %}
         </ul>
     </div>
-
-    <!-- JavaScript to fetch meal data -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('/fetch_meal')
-                .then(response => response.json())
-                .then(data => {
-                    const mealDropdown = document.getElementById('meal_id');
-                    data.forEach(meal => {
-                        const option = document.createElement('option');
-                        option.value = meal.meal_id;
-                        option.text = meal.meal_name;
-                        mealDropdown.appendChild(option);
-                    });
-                });
-        });
-    </script>
 </body>
 </html>
