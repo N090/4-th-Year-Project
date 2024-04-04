@@ -26,25 +26,43 @@
     <h1>Add Food to Meal</h1>
     <!-- Form for adding food -->
     <form id="addFoodForm" action="{{ url_for('add_food_to_meal', meal_id=meal_id) }}" method="post">
-        <!-- Add input fields for food_id and serving_size -->
-        <label for="food_id">Food ID:</label>
-        <input type="text" id="food_id" name="food_id">
-    
-        <label for="serving_size">Serving Size:</label>
-        <input type="text" id="serving_size" name="serving_size">
+        <!-- Hidden input field for food_id -->
+        <input type="hidden" id="food_id" name="food_id">
+        
+        <!-- Drop down menu for selecting food -->
+        <label for="food_name">Select Food:</label>
+        <select id="food_name" name="food_name" class="form-meal" onchange="fetchFoodDetails()">
+            <option value="">Select Food</option>
+            {% for food in foods %}
+            <option value="{{ food.food_id }}">{{ food.food_name }}</option>
+            {% endfor %}
+        </select><br>
+        
+        <!-- Input field for meal name -->
+        <label for="meal_name">Meal Name:</label>
+        <input type="text" id="meal_name" name="meal_name" class="form-meal"><br>
         
         <!-- Add a submit button -->
         <button type="submit">Add Food</button>
     </form>
-    
-    <!-- Placeholder for displaying food details -->
-    <div id="foodDetails"></div>
+
+    <!-- Display food details -->
+    <div id="foodDetails"></div><br>
+
+    <!-- Display current foods -->
+    <h2>Current Foods:</h2>
+    <ul>
+        {% for food in current_meal_foods %}
+        <li>{{ food.food_name }} - Serving Size: {{ food.serving_size }}</li>
+        {% endfor %}
+    </ul>
     
     <!-- JavaScript to fetch food details -->
     <script>
         function fetchFoodDetails() {
-            var foodId = document.getElementById("food_id").value;
-            fetch("/food_details/" + foodId)
+            var foodId = document.getElementById("food_name").value;  // Retrieve selected food ID
+            document.getElementById("food_id").value = foodId;  // Set the selected food ID in the hidden input field
+            fetch("/fetch_food_details/" + foodId)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -52,16 +70,43 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Display food details in a different way, for example:
-                    var foodDetails = "<p><strong>Name:</strong> " + data.name + "</p>";
-                    foodDetails += "<p><strong>Calories:</strong> " + data.calories + "</p>";
-                    foodDetails += "<p><strong>Protein:</strong> " + data.protein + "</p>";
-                    foodDetails += "<p><strong>Carbohydrates:</strong> " + data.carbohydrates + "</p>";
-                    foodDetails += "<p><strong>Fat:</strong> " + data.fat + "</p>";
-                    document.getElementById("foodDetails").innerHTML = foodDetails;
+                    // Check if data contains food details or an error
+                    if ('error' in data) {
+                        document.getElementById("foodDetails").innerHTML = "<p>" + data.error + "</p>";
+                    } else {
+                        // Display food details without showing food ID
+                        var foodDetails = "<p><strong>Name:</strong> " + data.food_name + "</p>";
+                        foodDetails += "<p><strong>Calories:</strong> " + data.calories_serving + "</p>";
+                        foodDetails += "<p><strong>Serving Size:</strong> " + data.serving_size + "</p>";
+                        foodDetails += "<p><strong>Carbs:</strong> " + data.carbs + "</p>";
+                        foodDetails += "<p><strong>Fat:</strong> " + data.fat + "</p>";
+                        foodDetails += "<p><strong>Protein:</strong> " + data.protein + "</p>";
+                        document.getElementById("foodDetails").innerHTML = foodDetails;
+                    }
                 })
                 .catch(error => console.error('Error fetching food details:', error));
         }
+
+        // Reload the same page with the same meal ID after form submission
+        document.getElementById("addFoodForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+            var form = event.target;
+            var formData = new FormData(form);
+            var mealId = form.getAttribute("action").split("/").pop(); // Extract meal ID from form action
+            fetch(form.getAttribute("action"), {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Reload the page with the same meal ID
+                window.location.href = "/add_food_to_meal/" + mealId;
+            })
+            .catch(error => console.error('Error adding food:', error));
+        });
     </script>
+
 </body>
 </html>

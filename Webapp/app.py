@@ -451,44 +451,47 @@ def add_food(meal_id):
 @app.route('/add_food_to_meal/<int:meal_id>', methods=['POST'])
 def add_food_to_meal(meal_id):
     if request.method == 'POST':
-        # Retrieve data from the form
-        food_id = request.form['food_id']
-        serving_size = request.form['serving_size']
+        # Retrieve data from the form safely using get() method
+        food_id = request.form.get('food_id')
+        serving_size = request.form.get('serving_size')
+        
+        # Check if food_id is None or empty
+        if not food_id:
+            return "Food ID is missing or invalid", 400
         
         # Perform any necessary validations
         
-        # Add the food to the meal in the database
-        meal = Meal.query.get_or_404(meal_id)
-        food = Food.query.get_or_404(food_id)
-        new_nutrition_program = NutritionProgram(meal_id=meal_id, food_id=food_id, serving_size=serving_size)
-        db.session.add(new_nutrition_program)
-        db.session.commit()
-        
-        # Assuming you have a success message to display
-        return "Food added to the meal successfully!"
+        # Render the add_food.html template with the necessary parameters
+        return render_template('add_food.html', meal_id=meal_id, food_id=food_id, serving_size=serving_size)
 
     else:
         # Handle other HTTP methods if needed
         return "Method not allowed", 405  # Method Not Allowed error
 
+
 @app.route('/fetch_food')
 def fetch_food():
-    # Select all columns from the food table
-    foods = Food.query.with_entities(
-        Food.food_id,
-        Food.food_name,
-        Food.calories_serving,
-        Food.serving_size,
-        Food.carbs,
-        Food.fat,
-        Food.protein
-    ).all()
-    # Convert food data to JSON format
-    food_data = [{'food_id': food.food_id, 'food_name': food.food_name, 'calories_serving': food.calories_serving,
-                  'serving_size': food.serving_size, 'carbs': food.carbs, 'fat': food.fat, 'protein': food.protein}
-                 for food in foods]
-    # Return JSON response
+    foods = Food.query.all()
+    food_data = [{'food_id': food.food_id, 'food_name': food.food_name} for food in foods]
     return jsonify(food_data)
+
+@app.route('/fetch_food_details/<int:food_id>')
+def fetch_food_details(food_id):
+    food = Food.query.get(food_id)
+    if food:
+        food_details = {
+            'food_name': food.food_name,
+            'calories_serving': food.calories_serving,
+            'serving_size': food.serving_size,
+            'carbs': food.carbs,
+            'fat': food.fat,
+            'protein': food.protein
+        }
+        return jsonify(food_details)
+    else:
+        return jsonify({'error': 'Food not found'}), 404
+
+# Routes for adding food to meal
 
 @app.route('/fetch_meal')
 def fetch_meal():
