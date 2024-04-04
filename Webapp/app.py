@@ -367,8 +367,17 @@ def nutrition_program():
             # Retrieve meal_id from the session if set
             meal_id = session.get('current_meal_id')
             
-            return render_template('nutrition_program.html', roles=roles, meals=meals, meal_id=meal_id)
+            # Render the template based on the user's role
+            if user.role == "trainer":
+                return render_template('nutrition_program.html', role=user.role, meals=meals, meal_id=meal_id)
+            elif user.role == "client":
+                # Customize the rendering for clients if needed
+                return render_template('nutrition_program_client.html', role=user.role, meals=meals, meal_id=meal_id)
+            elif user.role == "solo-client":
+                # Customize the rendering for solo clients if needed
+                return render_template('nutrition_program_solo_client.html', role=user.role, meals=meals, meal_id=meal_id)
     return redirect(url_for('login'))
+
 
 # Function to initialize the current nutrition program in the session
 def initialize_current_nutrition():
@@ -402,8 +411,6 @@ def initialize_current_meal():
 def add_food(meal_id):
     # Check if the user is logged in
     username = session.get('username')
-    if not username:
-        return redirect(url_for('login'))
 
     # Handle POST request to add food to meal
     if request.method == 'POST':
