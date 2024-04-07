@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Food to Meal</title>
+    <title>Add Food to Nutrition Program</title>
     <!-- Link to your stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
     <!-- Inline CSS for the home button -->
@@ -17,51 +17,56 @@
     </style>
 </head>
 <body>
-    <!-- Home button -->
-    <a href="{{ url_for('main') }}" class="home-button">
-        <!-- Adjust the path to your home.png file -->
-        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" width="40" height="40">
-    </a>
+    <div class="food-center-box">
+        <!-- Home button -->
+        <a href="{{ url_for('main') }}" class="home-button">
+            <!-- Adjust the path to your home.png file -->
+            <img src="{{ url_for('static', filename='home.png') }}" alt="Home" width="40" height="40">
+        </a>
 
-    <h1>Add Food to Meal</h1>
-    <!-- Form for adding food -->
-    <form id="addFoodForm" action="{{ url_for('add_food_to_meal', meal_id=meal_id) }}" method="post">
-        <!-- Hidden input field for food_id -->
-        <input type="hidden" id="food_id" name="food_id">
-        
-        <!-- Drop down menu for selecting food -->
-        <label for="food_name">Select Food:</label>
-        <select id="food_name" name="food_name" class="form-meal" onchange="fetchFoodDetails()">
-            <option value="">Select Food</option>
-            {% for food in foods %}
-            <option value="{{ food.food_id }}">{{ food.food_name }}</option>
-            {% endfor %}
-        </select><br>
-        
-        <!-- Input field for meal name -->
-        <label for="meal_name">Meal Name:</label>
-        <input type="text" id="meal_name" name="meal_name" class="form-meal"><br>
-        
-        <!-- Add a submit button -->
-        <button type="submit">Add Food</button>
-    </form>
+        <h1 class="food-header">Add Food to Nutrition Program</h1>
 
-    <!-- Display food details -->
-    <div id="foodDetails"></div><br>
+        <!-- Form for adding food -->
+        <form id="addFoodForm" class="food-form" action="{{ url_for('add_food_to_nutrition', nutrition_id=nutrition_id) }}" method="post">
+            <!-- Drop down menu for selecting food -->
+            <label for="food_id">Select Food:</label><br>
+            <select id="food_id_select" name="food_id">
+                <!-- Include options dynamically based on available foods -->
+                {% for food in foods %}
+                    <option value="{{ food.food_id }}">{{ food.food_name }}</option>
+                {% endfor %}
+            </select><br>                
+            
+            <!-- Add a submit button -->
+            <button type="submit">Add Food</button>
+        </form>    
 
-    <!-- Display current foods -->
-    <h2>Current Foods:</h2>
-    <ul>
-        {% for food in current_meal_foods %}
-        <li>{{ food.food_name }} - Serving Size: {{ food.serving_size }}</li>
-        {% endfor %}
-    </ul>
-    
+        <!-- Display food details -->
+        <div id="foodDetails" class="food-details"></div>
+
+        <div class="food-container">
+            <h2>Current Foods:</h2>
+            <ul class="food-current-list">
+                {% for food in current_nutrition_foods %}
+                <li class="food-current-item">{{ food.food.food_name }} - Calories: {{ food.food.calories_serving }}
+                    <!-- Form to remove food -->
+                    <form method="post" action="{{ url_for('remove_food', nutrition_id=nutrition_id, food_id=food.food_id) }}">
+                        <button type="submit">Remove</button>
+                        <input type="hidden" name="food_id" value="{{ food.food_id }}">
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <button onclick="goBackToNutrition()">Finish & Start New Nutrition-Program</button>
+
+    </div>
     <!-- JavaScript to fetch food details -->
     <script>
+        document.getElementById("food_id_select").addEventListener("change", fetchFoodDetails);
+
         function fetchFoodDetails() {
-            var foodId = document.getElementById("food_name").value;  // Retrieve selected food ID
-            document.getElementById("food_id").value = foodId;  // Set the selected food ID in the hidden input field
+            var foodId = document.getElementById("food_id_select").value;
             fetch("/fetch_food_details/" + foodId)
                 .then(response => {
                     if (!response.ok) {
@@ -87,26 +92,14 @@
                 .catch(error => console.error('Error fetching food details:', error));
         }
 
-        // Reload the same page with the same meal ID after form submission
-        document.getElementById("addFoodForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent default form submission
-            var form = event.target;
-            var formData = new FormData(form);
-            var mealId = form.getAttribute("action").split("/").pop(); // Extract meal ID from form action
-            fetch(form.getAttribute("action"), {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                // Reload the page with the same meal ID
-                window.location.href = "/add_food_to_meal/" + mealId;
-            })
-            .catch(error => console.error('Error adding food:', error));
-        });
-    </script>
+        // Fetch initial food details on page load
+        window.onload = fetchFoodDetails;
 
+        // Function to go back to the previous page
+        function goBackToNutrition() {
+            // You can save the data here before going back
+            window.location.href = "{{ url_for('nutrition_program') }}";
+        }
+    </script>
 </body>
 </html>

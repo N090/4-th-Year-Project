@@ -12,16 +12,6 @@
             left: 10px;
             cursor: pointer;
         }
-        .nutrition-btn {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -41,29 +31,43 @@
                 <a href="#" class="nutrition-btn">View Nutrition Program</a><br>
             </div>            
         {% endif %}
-
         <!-- Add a button to navigate to add_food.html -->
         {% if role == "trainer" %}
-            <div class="nutrition-btn-container">
-                <form action="{{ url_for('add_food', meal_id=meal_id) }}" method="GET">
-                    <button type="submit" class="nutrition-btn">Create a Meal</button>
-                </form>  
-            </div>
+        <div class="nutrition-btn-container">
+            <form action="{{ url_for('create_nutrition_program') }}" method="POST">
+                <label for="n_name">Name:</label><br>
+                <input type="text" id="n_name" name="n_name" required><br>                
+                <label for="n_description">Description:</label><br>
+                <textarea id="n_description" name="n_description" rows="4" cols="50"></textarea><br>
+                <label for="n_difficulty">Difficulty:</label><br>
+                <select id="n_difficulty" name="n_difficulty">
+                    <option value="1">Easy</option>
+                    <option value="2">Medium</option>
+                    <option value="3">Hard</option>
+                    <option value="4">Professional</option>
+                </select><br>
+                <button type="submit" class="nutrition-btn">Create Nutrition Program</button>
+            </form>        
+        </div>
         {% endif %}
-
         <!-- View Nutrition Programs -->
-        <h2 class="h2-nutrition">View Nutrition Programs</h2>
-        <ul class="ul-nutrition">
-            {% for program in nutrition_programs %}
-            <li class="li-nutrition">{{ program.meal.meal_name }} - {{ program.food.food_name }}
-                {% if role == "trainer" %}
-                <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
-                    <button type="submit" class="main-button">Delete</button>
-                </form>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
+<h2 class="h2-nutrition">View Nutrition Programs</h2>
+<ul class="ul-nutrition">
+    {% for program in nutrition_programs %}
+    <li class="li-nutrition">
+        <strong>Name:</strong> {{ program.n_name }}<br>
+        <strong>Description:</strong> {{ program.n_description }}<br>
+        <strong>Difficulty:</strong> {{ program.n_difficulty }}<br>
+        {% if role == "trainer" %}
+        <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
+            <button type="submit" class="main-button">Delete</button>
+        </form>        
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+
     </div>
 </body>
 </html>
