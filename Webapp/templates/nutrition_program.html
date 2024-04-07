@@ -51,23 +51,25 @@
         </div>
         {% endif %}
         <!-- View Nutrition Programs -->
-<h2 class="h2-nutrition">View Nutrition Programs</h2>
-<ul class="ul-nutrition">
-    {% for program in nutrition_programs %}
-    <li class="li-nutrition">
-        <strong>Name:</strong> {{ program.n_name }}<br>
-        <strong>Description:</strong> {{ program.n_description }}<br>
-        <strong>Difficulty:</strong> {{ program.n_difficulty }}<br>
-        {% if role == "trainer" %}
-        <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
-            <button type="submit" class="main-button">Delete</button>
+        <h2 class="h2-nutrition">View Nutrition Programs</h2>
+        <ul class="ul-nutrition">
+            {% for program in nutrition_programs %}
+            <li class="li-nutrition">
+                <strong>Name:</strong> {{ program.n_name }}<br>
+                <strong>Description:</strong> {{ program.n_description }}<br>
+                <strong>Difficulty:</strong> {{ program.n_difficulty }}<br>
+                {% if role == "trainer" %}
+                <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
+                    <button type="submit" class="main-button">Delete</button>
+                </form>        
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        <form action="{{ url_for('calculate_bmi') }}" method="POST">
+            <!-- Form inputs for BMI calculation go here -->
+            <button type="submit" class="nutrition-btn">Calculate BMI</button>
         </form>        
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
-
-
     </div>
 </body>
 </html>

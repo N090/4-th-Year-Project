@@ -148,6 +148,14 @@ def main():
             return render_template('main.html', username=username, role=user.role)
     return redirect(url_for('login'))
 
+@app.route('/bmi', methods=['GET', 'POST'])
+def calculate_bmi():
+    if request.method == 'POST':
+        # Handle the form submission for BMI calculation
+        # You can access form data using request.form
+        # Perform BMI calculation logic here
+        pass  # Placeholder for BMI calculation logic
+    return render_template('bmi.html')
 
 @app.route('/add_exercises_to_workout/<int:workout_id>', methods=['GET', 'POST'])
 def add_exercises_to_workout(workout_id):

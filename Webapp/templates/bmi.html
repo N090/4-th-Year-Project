@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        /* Add styling for the highlighted option */
+        .highlighted {
+            background-color: yellow;
+        }
+    </style>
+    <script>
+        // JavaScript function to highlight the selected option
+        function highlightOption(optionId) {
+            // Remove highlight from all options
+            var options = document.getElementsByClassName("option");
+            for (var i = 0; i < options.length; i++) {
+                options[i].classList.remove("highlighted");
+            }
+            // Highlight the selected option
+            document.getElementById(optionId).classList.add("highlighted");
+        }
+    </script>
+</head>
+<body>
+    <h1>BMI Calculator</h1>
+    <div>
+        <!-- Option bar to choose between metric, standard American English, and British Imperial systems -->
+        <span class="option" id="metric" onmouseover="highlightOption('metric')">Metric</span>
+        <span class="option" id="american" onmouseover="highlightOption('american')">Standard American English</span>
+        <span class="option" id="british" onmouseover="highlightOption('british')">British Imperial</span>
+    </div>
+    <!-- BMI calculator form -->
+    <form id="bmiForm">
+        <label for="height">Height:</label>
+        <input type="number" id="height" name="height" step="any"> <!-- Allow decimal input -->
+        <select id="heightUnit">
+            <!-- Height unit options based on the selected system -->
+            <!-- Metric: meters, Standard American English: inches, British Imperial: feet -->
+            <option value="m">meters</option>
+            <option value="in">inches</option>
+            <option value="ft">feet</option>
+        </select><br>
+        <label for="weight">Weight:</label>
+        <input type="number" id="weight" name="weight" step="any"> <!-- Allow decimal input -->
+        <select id="weightUnit">
+            <!-- Weight unit options based on the selected system -->
+            <!-- Metric: kilograms, Standard American English: pounds, British Imperial: stones -->
+            <option value="kg">kilograms</option>
+            <option value="lb">pounds</option>
+            <option value="st">stones</option>
+        </select><br><br>
+        <!-- Button to calculate BMI -->
+        <button type="button" onclick="calculateBMI()">Calculate BMI</button>
+    </form>
+    <!-- Display BMI result -->
+    <div id="result"></div>
+
+    <script>
+        // JavaScript function to calculate BMI
+        function calculateBMI() {
+            var height = parseFloat(document.getElementById("height").value); // Get height value
+            var weight = parseFloat(document.getElementById("weight").value); // Get weight value
+            var heightUnit = document.getElementById("heightUnit").value; // Get selected height unit
+            var weightUnit = document.getElementById("weightUnit").value; // Get selected weight unit
+
+            // Convert height to meters
+            if (heightUnit === "in") {
+                height /= 39.37; // 1 inch = 0.0254 meters
+            } else if (heightUnit === "ft") {
+                height /= 3.281; // 1 foot = 0.3048 meters
+            }
+
+            // Convert weight to kilograms
+            if (weightUnit === "lb") {
+                weight /= 2.205; // 1 pound = 0.4536 kilograms
+            } else if (weightUnit === "st") {
+                weight *= 6.35; // 1 stone = 6.35 kilograms
+            }
+
+            // Calculate BMI
+            var bmi = weight / (height * height);
+
+            // Display BMI result
+            document.getElementById("result").innerHTML = "Your BMI is: " + bmi.toFixed(2);
+        }
+    </script>
+</body>
+</html>
