@@ -366,4 +366,66 @@ h1 {
     left: 10px;
     cursor: pointer;
 }
+/*BMI STYLES*/
 
+  /* Global styles */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+}
+
+/* Common container styles */
+.bmi-container {
+    width: 400px; /* Adjust the width as needed */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Center horizontally */
+    text-align: center; /* Center content */
+}
+
+/* BMI calculator form */
+.bmi-form {
+    margin-top: 20px;
+}
+
+.bmi-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.bmi-form input[type="number"],
+.bmi-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* BMI calculator button */
+.bmi-button {
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DB954;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.bmi-button:hover {
+    background-color: #4CAF50;
+}
+
+/* BMI result */
+.bmi-result {
+    margin-top: 20px;
+    text-align: center;
+}
