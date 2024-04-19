@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Clients</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <script>
+        function removeClient(clientId) {
+            if (confirm("Are you sure you want to remove this client?")) {
+                // Make an AJAX request to remove the client
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/remove_client/" + clientId, true); // Change the method to POST and the endpoint to include the client ID
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            // Reload the page after removal
+                            location.reload();
+                        } else {
+                            // Handle error
+                            console.error("Failed to remove client");
+                        }
+                    }
+                };
+                xhr.send();
+            }
+        }
+    </script>
+    <style>
+        /* Style the delete button */
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="client-container">
+        <h1 class="client-heading">View Clients</h1>
+        {% if clients %}
+            <ul>
+                {% for client in clients %}
+                    <li>
+                        <div class="client-box">
+                            <h2>{{ client.username }}</h2>
+                            <p>Email: {{ client.email }}</p>
+                            <form action="{{ url_for('assign_program_to_client', client_id=client.client_id) }}" method="GET">
+                                <input type="hidden" name="client_id" value="{{ client.client_id }}">
+                                <input type="hidden" name="trainer_id" value="{{ trainer_id }}">
+                                <button type="submit" class="client-btn">Assign Program</button>
+                                <button type="button" class="delete-btn" onclick="removeClient('{{ client.client_id }}')">Remove Client</button> <!-- Pass client ID as string -->
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No clients found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

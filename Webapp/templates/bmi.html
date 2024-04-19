@@ -6,46 +6,49 @@
     <title>BMI Calculator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
     <script>
-        // JavaScript function to calculate BMI
         function calculateBMI() {
             var heightMeters = 0;
             var heightInput = document.getElementById("bmi-height");
             var heightCentimetersInput = document.getElementById("bmi-heightCentimeters");
-            var heightUnit = document.getElementById("bmi-heightUnit").value; // Get selected height unit
-            var weight = parseFloat(document.getElementById("bmi-weight").value); // Get weight value
-            var weightUnit = document.getElementById("bmi-weightUnit").value; // Get selected weight unit
-
-            // Convert height to meters
+            var heightUnit = document.getElementById("bmi-heightUnit").value;
+            var weight = parseFloat(document.getElementById("bmi-weight").value);
+            var weightUnit = document.getElementById("bmi-weightUnit").value;
+    
             if (heightUnit === "m") {
                 heightMeters = parseFloat(heightInput.value);
             } else if (heightUnit === "in") {
-                heightMeters = parseFloat(heightInput.value) / 39.37; // 1 inch = 0.0254 meters
+                heightMeters = parseFloat(heightInput.value) / 39.37;
             } else if (heightUnit === "ft") {
-                heightMeters = parseFloat(heightInput.value) / 3.281; // 1 foot = 0.3048 meters
+                heightMeters = parseFloat(heightInput.value) / 3.281;
             } else if (heightUnit === "cm") {
-                heightMeters = parseFloat(heightCentimetersInput.value) / 100; // Convert centimeters to meters
+                heightMeters = parseFloat(heightCentimetersInput.value) / 100;
             }
-
-            // Convert weight to kilograms
+    
             if (weightUnit === "lb") {
-                weight /= 2.205; // 1 pound = 0.4536 kilograms
+                weight /= 2.205;
             } else if (weightUnit === "st") {
-                weight *= 6.35; // 1 stone = 6.35 kilograms
+                weight *= 6.35;
             }
-
-            // Calculate BMI
+    
             var bmi = weight / (heightMeters * heightMeters);
-
-            // Display BMI result
-            document.getElementById("bmi-result").innerHTML = "Your BMI is: " + bmi.toFixed(2);
+            var bmiResult = document.getElementById("bmi-result");
+    
+            if (bmi < 18) {
+                bmiResult.innerHTML = "Your BMI is: " + bmi.toFixed(2) + ". You are underweight.";
+            } else if (bmi >= 18 && bmi < 25) {
+                bmiResult.innerHTML = "Your BMI is: " + bmi.toFixed(2) + ". You are at a healthy weight.";
+            } else if (bmi >= 25 && bmi < 30) {
+                bmiResult.innerHTML = "Your BMI is: " + bmi.toFixed(2) + ". You are overweight.";
+            } else {
+                bmiResult.innerHTML = "Your BMI is: " + bmi.toFixed(2) + ". You are obese.";
+            }
         }
-
-        // Function to toggle height input based on selected unit
+    
         function toggleHeightInput() {
             var heightUnit = document.getElementById("bmi-heightUnit").value;
             var heightInput = document.getElementById("bmi-height");
             var heightCentimetersInput = document.getElementById("bmi-heightCentimeters");
-
+    
             if (heightUnit === "cm") {
                 heightInput.style.display = "none";
                 heightCentimetersInput.style.display = "block";
@@ -54,13 +57,12 @@
                 heightCentimetersInput.style.display = "none";
             }
         }
-
-        // Function to go back to the previous page
+    
         function goBackToNutrition() {
-            // You can save the data here before going back
             window.location.href = "{{ url_for('nutrition_program') }}";
         }
     </script>
+    
 </head>
 <body>
     <div class="bmi-container">

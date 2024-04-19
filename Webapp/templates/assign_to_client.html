@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Program to Client</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+</head>
+<body>
+    <div class="client-container">
+        <h1 class="client-heading">Assign Program to Client</h1>
+        <!-- Display Workout Programs -->
+        <h2>Workout Programs</h2>
+        {% if workout_programs %}
+            <ul>
+                {% for program_with_exercises in workout_programs %}
+                    <li class="li-workout">
+                        <h3>{{ program_with_exercises.w_name }}</h3> <!-- Assuming 'name' is the attribute for program name -->
+                        <p>Description: {{ program_with_exercises.description }}</p> <!-- Assuming 'description' is the attribute for program description -->
+                        <p>Difficulty: {{ program_with_exercises.difficulty }}</p> <!-- Assuming 'difficulty' is the attribute for program difficulty -->
+                        <p>Exercises:</p>
+                        <ul>
+                            {% for exercise in program_with_exercises.exercises %}
+                                <li>{{ exercise.name }} - {{ exercise.description }}</li> <!-- Adjust according to your Exercise model attributes -->
+                            {% endfor %}
+                        </ul>
+                        <form action="{{ url_for('assign_program_to_client', client_id=client.id) }}" method="POST">
+                            <input type="hidden" name="program_type" value="workout"> <!-- For workout program -->
+                            <input type="hidden" name="program_id" value="{{ program_with_exercises.workout_id }}"> <!-- Assuming 'id' is the attribute for program id -->
+                            <input type="hidden" name="trainer_id" value="{{ trainer_id }}">
+                            <button type="submit" class="main-button">Assign Workout Program</button>
+                        </form>
+                        
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No workouts available</p>
+        {% endif %}
+        <!-- Display Nutrition Programs -->
+      <!-- Display Nutrition Programs -->
+<h2>Nutrition Programs</h2>
+{% if nutrition_programs %}
+    <ul>
+        {% for nutrition_program_with_food in nutrition_programs %}
+            <li class="li-nutrition">
+                <h3>{{ nutrition_program_with_food.n_name }}</h3>
+                <p>Description: {{ nutrition_program_with_food.n_description }}</p>
+                <p>Difficulty: {{ nutrition_program_with_food.n_difficulty }}</p>
+                <p>Food Items:</p>
+                <ul>
+                    {% for food_nutrition_program_entry in nutrition_program_with_food['food_nutrition_programs'] %}
+                    <li>{{ food_nutrition_program_entry.food.food_name }} - Calories: {{ food_nutrition_program_entry.food.calories_serving }} - Carbs: {{ food_nutrition_program_entry.food.carbs }} - Fat: {{ food_nutrition_program_entry.food.fat }} - Protein: {{ food_nutrition_program_entry.food.protein }}</li>
+                {% endfor %}
+                </ul>
+                <form action="{{ url_for('assign_program_to_client', client_id=client.id) }}" method="POST">
+                    <input type="hidden" name="program_type" value="nutrition">
+                    <input type="hidden" name="program_id" value="{{ nutrition_program_with_food.n_id }}">
+                    <input type="hidden" name="trainer_id" value="{{ trainer_id }}">
+                    <button type="submit" class="main-button">Assign Nutrition Program</button>
+                </form>
+            </li>
+        {% endfor %}
+{% else %}
+    <p>No nutrition programs available</p>
+{% endif %}
+    </div>
+</body>
+</html>
