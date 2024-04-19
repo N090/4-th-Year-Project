@@ -323,18 +323,6 @@ def change_password():
                 return render_template('change_password.html')
     return redirect(url_for('login'))
 
-@app.route('/delete_workout_solo/<int:id>')
-def delete_workout_solo(id):
-    username = session.get('username')
-    if username:
-        user = User.query.filter_by(username=username).first()
-        if user and (user.role == "solo-client" or user.role == "client"):
-            WorkoutProgramExercises.query.filter_by(workout_id=id).delete()
-            workout = WorkoutProgram.query.get(id)
-            db.session.delete(workout)
-            db.session.commit()
-    return redirect(url_for('workout_program'))
-
 @app.route('/workout_program')
 def workout_program():
     username = session.get('username')
@@ -342,9 +330,14 @@ def workout_program():
         user = User.query.filter_by(username=username).first()
         if user:
             workouts = WorkoutProgram.query.all()
-            exercises = Exercises.query.all()
-            return render_template('workout_program.html', role=user.role, workouts=workouts, exercises=exercises)
+            workout_exercises = {}
+            for workout in workouts:
+                # Query associated exercises for each workout program
+                associated_exercises = db.session.query(Exercises).join(WorkoutProgramExercises).filter(WorkoutProgramExercises.workout_id == workout.workout_id).all()
+                workout_exercises[workout.workout_id] = associated_exercises
+            return render_template('workout_program.html', role=user.role, workouts=workouts, workout_exercises=workout_exercises)
     return redirect(url_for('login'))
+
 
 # Function to initialize the current workout program in the session
 def initialize_current_workout():
@@ -368,11 +361,12 @@ def add_exercise_to_current_workout(exercise_id, sets, reps):
 
 @app.route('/create_workout', methods=['GET', 'POST'])
 def create_workout():
+    user = session.get('username')
     if request.method == 'POST':
         username = session.get('username')
         if username:
             user = User.query.filter_by(username=username).first()
-            if user and user.role == "trainer":
+        if user and user.role in ["trainer", "solo-client"]:
                 # Collect workout details
                 w_name = request.form['name']
                 description = request.form['description']
@@ -444,7 +438,7 @@ def delete_workout(id):
     username = session.get('username')
     if username:
         user = User.query.filter_by(username=username).first()
-        if user and user.role == "trainer":
+        if user and (user.role == "solo-client" or user.role == "trainer"):
             # Check if the workout with the given ID exists
             workout = WorkoutProgram.query.get(id)
             if workout:
@@ -470,12 +464,19 @@ def nutrition_program():
                 nutrition_programs = NutritionProgram.query.filter_by(user_id=user.id).all()
             else:
                 nutrition_programs = NutritionProgram.query.all()
+
+            # Fetch associated food items for each nutrition program
+            nutrition_program_food = {}
+            for program in nutrition_programs:
+                associated_food = Food.query.join(FoodNutritionProgram).filter(FoodNutritionProgram.nutrition_program_id == program.n_id).all()
+                nutrition_program_food[program.n_id] = associated_food
                 
-            # Render the HTML template with the retrieved nutrition programs
-            return render_template('nutrition_program.html', role=user.role, nutrition_programs=nutrition_programs)
+            # Render the HTML template with the retrieved nutrition programs and associated food items
+            return render_template('nutrition_program.html', role=user.role, nutrition_programs=nutrition_programs, nutrition_program_food=nutrition_program_food)
     
     # Redirect to the main page if user is not logged in or doesn't have appropriate role
     return redirect(url_for('main'))
+
 
 
 # Function to initialize the current nutrition program in the session
@@ -492,7 +493,7 @@ def delete_nutrition_program(id):
     username = session.get('username')
     if username:
         user = User.query.filter_by(username=username).first()
-        if user and user.role == "trainer":
+        if user and (user.role == "solo-client" or user.role == "trainer"):
             # Check if the nutrition program with the given ID exists
             nutrition_program = NutritionProgram.query.get(id)
             if nutrition_program:
@@ -538,7 +539,7 @@ def create_nutrition_program():
         username = session.get('username')
         if username:
             user = User.query.filter_by(username=username).first()
-            if user and user.role == "trainer":
+        if user and user.role in ["trainer", "solo-client"]:
                 # Collect nutrition program details
                 n_name = request.form['n_name']
                 n_description = request.form['n_description']
@@ -764,52 +765,6 @@ def fetch_nutrition_programs():
         })
     return nutrition_programs_with_food
 
-
-
-
-# @app.route('/assign_program_to_client/<int:client_id>', methods=['POST'])
-# def assign_program_to_client(client_id):
-#     # Retrieve the client object
-#     client = Client.query.get_or_404(client_id)
-#     # Fetch workout programs for display
-#     workout_programs = WorkoutProgram.query.all()  # Assuming you have a WorkoutProgram model
-#     if request.method == 'POST':
-#         program_type = request.form.get('program_type')
-        
-#         # Retrieve the program_id based on the program_type
-#         if program_type == 'workout':
-#             program_id = request.form.get('program_with_exercises.workout_id')
-#         else:
-#             return jsonify({'error': 'Invalid program type'}), 400
-
-#         # Check if the trainer_id is stored in the session
-#         if 'trainer_id' in session:
-#             trainer_id = session['trainer_id']
-#         else:
-#             # Handle the case where the trainer_id is not found in the session
-#             return jsonify({'error': 'Trainer ID not found in session'}), 400
-
-#         # Validate client_id
-#         if not client:
-#             return jsonify({'error': 'Invalid client ID'}), 400
-        
-#         if program_type != 'workout':
-#             return jsonify({'error': 'Invalid program type'}), 400
-        
-
-#         assigned_program = AssignedWorkoutProgram(
-#             workout_program_id=program_id,
-#             client_id=client_id,
-#             trainer_id=trainer_id
-#         )
-        
-#         db.session.add(assigned_program)
-#         db.session.commit()
-        
-#         return redirect(url_for('view_clients', client_id=client_id))
-    
-#     return render_template('assign_to_client.html', client=client, workout_programs=workout_programs)
-
 @app.route('/assign_program_to_client/<int:client_id>', methods=['GET', 'POST'])
 def assign_program_to_client(client_id):
     # Retrieve the client object
@@ -945,16 +900,39 @@ def delete_client(client_id):
     return redirect(url_for('view_clients'))
 
 
+# Flask Route
 @app.route('/remove_client/<int:client_id>', methods=['POST'])
 def remove_client(client_id):
     if request.method == 'POST':
-        # Remove the client from assigned programs
-        AssignedNutritionProgram.query.filter_by(client_id=client_id).delete()
-        AssignedWorkoutProgram.query.filter_by(client_id=client_id).delete()
-        # Commit changes to the database
-        db.session.commit()
+        try:
+            # Remove the client from assigned programs
+            AssignedNutritionProgram.query.filter_by(client_id=client_id).delete()
+            AssignedWorkoutProgram.query.filter_by(client_id=client_id).delete()
+            # Commit changes to the database
+            db.session.commit()
+            # Return success message
+            return jsonify({'message': 'Client removed successfully'}), 200
+        except Exception as e:
+            # Handle error
+            print(str(e))
+            return jsonify({'error': 'Failed to remove client'}), 500
+
+@app.route('/remove_trainer_assignment/<int:client_id>', methods=['POST'])
+def remove_trainer_assignment(client_id):
+    # Check if the request method is POST
+    if request.method == 'POST':
+        # Retrieve the client-trainer assignment from the database
+        assignment = ClientTrainerAssignment.query.filter_by(client_id=client_id).first()
+        if assignment:
+            # Delete the assignment from the database
+            db.session.delete(assignment)
+            # Delete the assigned workout programs for the client
+            AssignedWorkoutProgram.query.filter_by(client_id=client_id).delete()
+            db.session.commit()
         # Redirect to the view_clients page
         return redirect(url_for('view_clients'))
+    # If the request method is not POST or assignment is not found, redirect to the view_clients page
+    return redirect(url_for('view_clients'))
 
 
 @app.route('/logout')

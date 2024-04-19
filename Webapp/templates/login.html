@@ -5,74 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
-    <style>
-        /* Center the form */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4; /* Background color for the page */
-        }
-
-        /* Style for the login container */
-        .login-container {
-            background-color: #fff; /* Background color for the container */
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px; /* Set maximum width */
-            width: 100%; /* Full width on smaller screens */
-        }
-
-        /* Form styling */
-        .form-login {
-            margin-top: 20px; /* Add space between heading and form */
-        }
-
-        /* Form label styling */
-        .form-login label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        /* Form input styling */
-        .form-login input[type="text"],
-        .form-login input[type="password"] {
-            width: calc(100% - 22px); /* Adjust width to fit inside the container */
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            transition: border-color 0.3s ease;
-        }
-
-        /* Form input focus styling */
-        .form-login input[type="text"]:focus,
-        .form-login input[type="password"]:focus {
-            border-color: #4CAF50;
-        }
-
-        /* Form button styling */
-        .form-login input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        /* Form button hover styling */
-        .form-login input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
     <div class="login-container">
@@ -84,6 +16,8 @@
             <input type="password" id="password" name="password"><br><br>
             <input type="submit" value="Login">
         </form>
+        <p>Don't have an account?</p>
+        <a href="/register" class="main-button">Register</a>
         {% if message %}
         <p>{{ message }}</p>
         {% endif %}

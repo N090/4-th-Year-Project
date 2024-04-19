@@ -6,6 +6,11 @@
     <title>Assign Program to Client</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 </head>
+<script>
+    function goBackToViewClients() {
+        window.location.href = "{{ url_for('view_clients') }}";
+    }
+</script>
 <body>
     <div class="client-container">
         <h1 class="client-heading">Assign Program to Client</h1>
@@ -64,6 +69,7 @@
 {% else %}
     <p>No nutrition programs available</p>
 {% endif %}
+<button onclick="goBackToViewClients()">Back to View Clients</button>
     </div>
 </body>
 </html>

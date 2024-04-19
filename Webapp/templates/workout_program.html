@@ -21,7 +21,7 @@
     <div class="workout-container">
         <h1 class="h1-workout">Workout Program</h1>
         
-        {% if role == "trainer" %}
+        {% if role == "trainer" or role == "solo-client" %}
         <!-- Form to create a new workout program -->
         <h2 class="h2-workout">New Workout Program</h2>
         <form class="form-workout" id="createWorkoutForm" action="{{ url_for('create_workout') }}" method="post">
@@ -40,20 +40,33 @@
         </form>
         {% endif %}
         
-      <!-- View Workouts -->
+<!-- View Workouts -->
 <h2 class="h2-workout">View Workouts</h2>
 <ul class="ul-workout">
     {% for workout in workouts %}
-    <li class="li-workout">{{ workout.w_name }} - {{ workout.description }} (Difficulty: {{ workout.difficulty }})
-        {% if role == "trainer" %}
-        <form action="{{ url_for('delete_workout', id=workout.workout_id) }}" method="post" style="display: inline;">
-            <button type="submit" class="main-button">Delete</button>
-        </form>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+    {% if workouts.user_id == session['user.id'] %}
+        <li class="li-workout">
+            <h3>{{ workout.w_name }}</h3>
+            <p>Description: {{ workout.description }} (Difficulty: {{ workout.difficulty }})</p>
+            <ul class="ul-exercises">
+                {% for exercise in workout_exercises[workout.workout_id] %}
+                    <li class="li-exercises">
+                        <p>{{ exercise.name }} - {{ exercise.description }}</p>
+                        <p>Muscle group: {{ exercise.muscle_group }}</p>
+                        <p>Equipment: {{ exercise.equipment }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if role == "trainer" or role == "solo-client" %}
+                <form action="{{ url_for('delete_workout', id=workout.workout_id) }}" method="post" style="display: inline;">
+                    <button type="submit" class="main-button">Delete</button>
+                </form>
+            {% endif %}
+        </li>
+    {% endif %}
+{% endfor %}
 
+</ul>
     </div>
 </body>
 </html>

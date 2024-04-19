@@ -6,25 +6,49 @@
     <title>View Clients</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
     <script>
-        function removeClient(clientId) {
+             function removeClient(clientId) {
+            console.log("Removing client with ID: " + clientId); // Add logging
             if (confirm("Are you sure you want to remove this client?")) {
-                // Make an AJAX request to remove the client
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/remove_client/" + clientId, true); // Change the method to POST and the endpoint to include the client ID
+                xhr.open("POST", "/remove_client/" + clientId, true);
+                xhr.setRequestHeader('Content-Type', 'application/json'); // Set content type
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
                         if (xhr.status === 200) {
-                            // Reload the page after removal
                             location.reload();
                         } else {
-                            // Handle error
                             console.error("Failed to remove client");
                         }
                     }
                 };
-                xhr.send();
+                xhr.send(JSON.stringify({})); // Send empty JSON object
             }
         }
+
+        function removeTrainerAssignment(clientId) {
+            console.log("Removing trainer assignment for client with ID: " + clientId); // Add logging
+            if (confirm("Are you sure you want to remove this client's trainer assignment and clear assigned programs?")) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/remove_trainer_assignment/" + clientId, true);
+                xhr.setRequestHeader('Content-Type', 'application/json'); // Set content type
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            location.reload();
+                        } else {
+                            console.error("Failed to remove trainer assignment and clear programs");
+                        }
+                    }
+                };
+                xhr.send(JSON.stringify({})); // Send empty JSON object
+            }
+        }
+
+        function goBackToClients() {
+            window.location.href = "{{ url_for('client') }}";
+        }
+
+
     </script>
     <style>
         /* Style the delete button */
@@ -52,7 +76,8 @@
                                 <input type="hidden" name="client_id" value="{{ client.client_id }}">
                                 <input type="hidden" name="trainer_id" value="{{ trainer_id }}">
                                 <button type="submit" class="client-btn">Assign Program</button>
-                                <button type="button" class="delete-btn" onclick="removeClient('{{ client.client_id }}')">Remove Client</button> <!-- Pass client ID as string -->
+                                <button type="button" class="delete-btn" onclick="removeTrainerAssignment('{{ client.client_id }}')">Remove Client</button> <!-- Pass client ID as string -->
+                                <button type="button" class="delete-btn" onclick="removeClient('{{ client.client_id }}')">Clear Programs</button> <!-- Pass client ID as string -->
                             </form>
                         </div>
                     </li>
@@ -61,6 +86,7 @@
         {% else %}
             <p>No clients found.</p>
         {% endif %}
+        <button onclick="goBackToClients()">Back to Clients</button>
     </div>
 </body>
 </html>

@@ -20,19 +20,8 @@
     </a>
     <div class="nutrition-container">
         <h1>Nutrition Program</h1>
-        {% if role == "solo-client" %}
-            <div class="nutrition-btn-container">
-                <a href="#" class="nutrition-btn">Create Nutrition Program</a><br>
-                <a href="#" class="nutrition-btn">View Nutrition Program</a><br>
-                <a href="#" class="nutrition-btn">Delete Nutrition Program</a><br>
-            </div>
-        {% elif role == "client" %}
-            <div class="nutrition-btn-container">
-                <a href="#" class="nutrition-btn">View Nutrition Program</a><br>
-            </div>            
-        {% endif %}
-        <!-- Add a button to navigate to add_food.html -->
-        {% if role == "trainer" %}
+         <!-- Add a button to navigate to add_food.html -->
+        {% if role == "trainer" or role == "solo-client" %}
         <div class="nutrition-btn-container">
             <form action="{{ url_for('create_nutrition_program') }}" method="POST">
                 <label for="n_name">Name:</label><br>
@@ -54,17 +43,29 @@
         <h2 class="h2-nutrition">View Nutrition Programs</h2>
         <ul class="ul-nutrition">
             {% for program in nutrition_programs %}
-            <li class="li-nutrition">
-                <strong>Name:</strong> {{ program.n_name }}<br>
-                <strong>Description:</strong> {{ program.n_description }}<br>
-                <strong>Difficulty:</strong> {{ program.n_difficulty }}<br>
-                {% if role == "trainer" %}
-                <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
-                    <button type="submit" class="main-button">Delete</button>
-                </form>        
-                {% endif %}
-            </li>
-            {% endfor %}
+            {% if program.user_id == session.user_id or program.user_id in managed_clients_user_ids %}
+                <li class="li-nutrition">
+                    <strong>Name:</strong> {{ program.n_name }}<br>
+                    <strong>Description:</strong> {{ program.n_description }}<br>
+                    <strong>Difficulty:</strong> {{ program.n_difficulty }}<br>
+                    <ul class="ul-food">
+                        {% for food in nutrition_program_food[program.n_id] %}
+                            <li class="li-food" style="font-size: 80%;">
+                                <p>{{ food.food_name }} - Calories: {{ food.calories_serving }}</p>
+                                <p>Serving Size: {{ food.serving_size }}</p>
+                                <p>Carbs: {{ food.carbs }}, Fat: {{ food.fat }}, Protein: {{ food.protein }}</p>  
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if role == "trainer" or role == "solo-client" %}
+                        <form action="{{ url_for('delete_nutrition_program', id=program.n_id) }}" method="post" style="display: inline;">
+                            <button type="submit" class="main-button">Delete</button>
+                        </form>        
+                    {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+        
         </ul>
         <form action="{{ url_for('calculate_bmi') }}" method="POST">
             <!-- Form inputs for BMI calculation go here -->
